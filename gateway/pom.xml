@@ -16,15 +16,13 @@
     <properties>
         <java.version>11</java.version>
         <spring-cloud.version>2021.0.1</spring-cloud.version>
+        <openapi.inputSpec>${project.basedir}/src/main/resources/open-api/credit-conveyor-api.yaml</openapi.inputSpec>
+        <openapi.basePackage>ru.deyev.credit.gateway</openapi.basePackage>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -45,6 +43,21 @@
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-webmvc-core</artifactId>
+            <version>1.6.7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.6.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.2</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -72,6 +85,37 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/src/main/resources/open-api/credit-conveyor-api.yaml
+                            </inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>ru.deyev.credit.gateway.api</apiPackage>
+                            <modelPackage>ru.deyev.credit.gateway.model</modelPackage>
+<!--                            <supportingFilesToGenerate>-->
+<!--                                ApiUtil.java-->
+<!--                            </supportingFilesToGenerate>-->
+                            <configOptions>
+                                <delegatePattern>true</delegatePattern>
+                                <sourceFolder>src/main/java/</sourceFolder>
+                                <library>spring-boot</library>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useBeanValidation>true</useBeanValidation>
+                                <dateLibrary>java11</dateLibrary>
+                                <java11>true</java11>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

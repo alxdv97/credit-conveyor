@@ -1,0 +1,126 @@
+openapi: 3.0.3
+info:
+  title: 'Credit Conveyor'
+  description: 'Simple Credit Conveyor based on Java, Spring, Microservices, Docker, Kafka and Postgres'
+  contact:
+    name: 'Deyev Alex | Deyev Michael'
+    url: 'https://github.com/alxdv97 | https://github.com/MichaelDeyev'
+  version: 5.0-oas3
+servers:
+  - url: 'http://localhost:8888/'
+    description: 'localhost'
+paths:
+  /application/:
+    post:
+      tags:
+        - applications
+      summary: Create loan application
+      operationId: createLoanApplication
+      description: Send short application for get credit variants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLoanApplicationRequestDTO'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanOfferDTO'
+        '400':
+          description: Bad Request
+
+
+components:
+#  parameters:
+
+  schemas:
+    CreateLoanApplicationRequestDTO:
+      title: Create Loan Application Request
+      type: object
+      description: Short application info
+      required:
+        - amount
+        - term
+        - firstName
+        - lastName
+        - birthDate
+        - passportSeries
+        - passportNumber
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 1000000
+#          pattern:
+          description: Requested loan amount
+        term:
+          type: integer
+          example: 24
+#          pattern:
+          description: Requested loan term (months)
+        firstName:
+          type: string
+          example: Ivan
+#          pattern:
+          description: First name
+        lastName:
+          type: string
+          example: Ivanov
+#          pattern:
+          description: Last name
+        middleName:
+          type: string
+          example: Ivanonovich
+#          pattern:
+          description: Middle name (if present)
+
+    LoanOfferDTO:
+      title: Loan offer
+      type: object
+      description: Loan offer after short scoring
+      required:
+        - amount
+        - term
+        - monthlyPayment
+        - rate
+        - isInsuranceEnabled
+        - isSalaryClient
+      properties:
+        amount:
+          type: integer
+          format: int64
+          example: 1000000
+          #          pattern:
+          description: Requested loan amount
+        term:
+          type: integer
+          example: 24
+          #          pattern:
+          description: Requested loan term (months)
+        monthlyPayment:
+          type: number
+          format: double
+          example: 10000.10
+          #          pattern:
+          description: Monthly payment
+        rate:
+          type: number
+          format: double
+          example: 12.50
+          #          pattern:
+          description: Loan rate
+        isInsuranceEnabled:
+          type: boolean
+          example: true
+          description: Is insurance enabled?
+        isSalaryClient:
+          type: boolean
+          example: true
+          description: Is salary client?
