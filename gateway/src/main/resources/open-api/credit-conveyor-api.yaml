@@ -7,13 +7,13 @@ info:
     url: 'https://github.com/alxdv97 | https://github.com/MichaelDeyev'
   version: 5.0-oas3
 servers:
-  - url: 'http://localhost:8888/'
+  - url: 'http://localhost:8080/'
     description: 'localhost'
 paths:
-  /application/:
+  /api/v1/application/:
     post:
       tags:
-        - applications
+        - application
       summary: Create loan application
       operationId: createLoanApplication
       description: Send short application for get credit variants
@@ -23,6 +23,26 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateLoanApplicationRequestDTO'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanOfferDTO'
+        '400':
+          description: Bad Request
+
+  /api/v1/test/:
+    get:
+      tags:
+        - test
+      summary: test
+      operationId: test
+      description: test
 
       responses:
         '200':
