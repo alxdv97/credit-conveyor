@@ -253,18 +253,26 @@ components:
       type: object
       description: Loan offer after short scoring.
       required:
-        - amount
+        - requestedAmount
+        - totalAmount
         - term
         - monthlyPayment
         - rate
         - isInsuranceEnabled
         - isSalaryClient
       properties:
-        amount:
-          type: integer
-          example: 1000000
-          minimum: 10000
+        requestedAmount:
+          type: number
+          format: double
+          example: 1000000.00
+          minimum: 10000.00
           description: Requested loan amount.
+        totalAmount:
+          type: number
+          format: double
+          example: 1000000.00
+          minimum: 10000.00
+          description: Total loan amount (with services, insurance etc.).
         term:
           type: integer
           example: 24
@@ -588,11 +596,11 @@ components:
           format: double
           example: 12000.00
           description: Interest payment amount.
-        loanPayment:
+        debtPayment:
           type: number
           format: double
           example: 8000.00
-          description: Loan payment amount.
+          description: Main debt payment amount.
         remainingDebt:
           type: number
           format: double
