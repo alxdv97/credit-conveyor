@@ -4,23 +4,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 import ru.deyev.credit.gateway.api.ApplicationApi;
-import ru.deyev.credit.gateway.api.TestApi;
+import ru.deyev.credit.gateway.model.CreateLoanApplicationRequestDTO;
+import ru.deyev.credit.gateway.model.FinishRegistrationRequestDTO;
 import ru.deyev.credit.gateway.model.LoanOfferDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class ApplicationController implements TestApi, ApplicationApi {
+public class ApplicationController implements ApplicationApi {
 
     @Override
-    public Optional<NativeWebRequest> getRequest() {
-        return TestApi.super.getRequest();
+    public ResponseEntity<Void> applyOffer(Integer offerId) {
+        return ApplicationApi.super.applyOffer(offerId);
     }
 
     @Override
-    public ResponseEntity<List<LoanOfferDTO>> test() {
-        return ResponseEntity.ok(List.of(new LoanOfferDTO().amount(1L)));
+    public ResponseEntity<List<LoanOfferDTO>> createLoanApplication(CreateLoanApplicationRequestDTO createLoanApplicationRequestDTO) {
+        return ApplicationApi.super.createLoanApplication(createLoanApplicationRequestDTO);
     }
 
+    @Override
+    public ResponseEntity<Void> denyLoanApplication() {
+        return ApplicationApi.super.denyLoanApplication();
+    }
+
+    @Override
+    public ResponseEntity<Void> finishRegistration(FinishRegistrationRequestDTO finishRegistrationRequestDTO) {
+        return ApplicationApi.super.finishRegistration(finishRegistrationRequestDTO);
+    }
 }
