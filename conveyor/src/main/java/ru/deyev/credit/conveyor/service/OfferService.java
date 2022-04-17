@@ -29,13 +29,13 @@ public class OfferService {
                                   Boolean isSalaryClient,
                                   CreateLoanApplicationRequest request) {
 
-        BigDecimal totalAmount = scoringService.evaluateTotalAmountByServices(new BigDecimal(request.getAmount()),
+        BigDecimal totalAmount = scoringService.evaluateTotalAmountByServices(request.getAmount(),
                 isInsuranceEnabled);
 
         BigDecimal rate = scoringService.calculateRate(isInsuranceEnabled, isSalaryClient);
 
         return new LoanOffer()
-                .requestedAmount(new BigDecimal(request.getAmount()))
+                .requestedAmount(request.getAmount())
                 .totalAmount(totalAmount)
                 .term(request.getTerm())
                 .isInsuranceEnabled(isInsuranceEnabled)

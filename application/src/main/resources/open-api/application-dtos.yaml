@@ -27,7 +27,8 @@ components:
         - passportNumber
       properties:
         amount:
-          type: integer
+          type: number
+          format: double
           example: 1000000
           minimum: 10000
           description: Requested loan amount.
@@ -79,11 +80,18 @@ components:
         - isInsuranceEnabled
         - isSalaryClient
       properties:
-        amount:
-          type: integer
-          example: 1000000
-          minimum: 10000
+        requestedAmount:
+          type: number
+          format: double
+          example: 1000000.00
+          minimum: 10000.00
           description: Requested loan amount.
+        totalAmount:
+          type: number
+          format: double
+          example: 1000000.00
+          minimum: 10000.00
+          description: Total loan amount (with services, insurance etc.).
         term:
           type: integer
           example: 24
@@ -222,7 +230,8 @@ components:
         - statusHistory
       properties:
         id:
-          type: string
+          type: integer
+          format: int64
           example: 123
           description: Application id.
         client:
@@ -347,8 +356,8 @@ components:
       description: Credit's info.
       properties:
         amount:
-          type: integer
-          format: int64
+          type: number
+          format: double
           example: 1000000
           description: Requested loan amount.
         term:

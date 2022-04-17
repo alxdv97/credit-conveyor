@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/credit-conveyor-db
+    username: postgres
+    password: 123
+
+server:
+  port: 8082

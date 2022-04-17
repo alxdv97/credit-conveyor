@@ -28,10 +28,10 @@ public class ScoringService {
 
     public Credit calculateCredit(ScoringData scoringData) {
 
-        BigDecimal totalAmount = evaluateTotalAmountByServices(new BigDecimal(scoringData.getAmount()),
+        BigDecimal totalAmount = evaluateTotalAmountByServices(scoringData.getAmount(),
                 scoringData.getIsInsuranceEnabled());
 
-        BigDecimal requestedAmount = BigDecimal.valueOf(scoringData.getAmount());
+        BigDecimal requestedAmount = scoringData.getAmount();
 
         BigDecimal rate = calculateRate(scoringData.getIsInsuranceEnabled(), scoringData.getIsSalaryClient());
 
