@@ -1,8 +1,19 @@
 spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
   datasource:
+    driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/credit-conveyor-db
     username: postgres
     password: 123
-
+  liquibase:
+    change-log: classpath:db.changelog/db.changelog-master.xml
+    url: jdbc:postgresql://localhost:5432/credit-conveyor-db
+    user: postgres
+    password: 123
+    driver-class-name: org.postgresql.Driver
 server:
   port: 8082

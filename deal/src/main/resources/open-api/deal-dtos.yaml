@@ -254,8 +254,8 @@ components:
           description: Client's work experience in current job.
 
 
-    Credit:
-      title: Credit
+    CreditDTO:
+      title: CreditDTO
       type: object
       description: Credit's info.
       properties:
