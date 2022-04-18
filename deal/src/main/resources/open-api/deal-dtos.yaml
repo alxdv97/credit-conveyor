@@ -13,7 +13,7 @@ paths: {}
 
 components:
   schemas:
-    CreateLoanApplicationRequest:
+    CreateLoanApplicationRequestDTO:
       title: Create Loan Application Request
       type: object
       description: Short application info.
@@ -68,7 +68,7 @@ components:
           pattern: '[0-9]{6}'
           description: Client's passport series
 
-    LoanOffer:
+    LoanOfferDTO:
       title: Loan offer
       type: object
       description: Loan offer after short scoring.
@@ -117,7 +117,7 @@ components:
           example: true
           description: Is salary client?
 
-    ScoringData:
+    ScoringDataDTO:
       title: Scoring Data
       type: object
       description: Full scoring data.
@@ -194,7 +194,7 @@ components:
           example: 1
           description: Client's dependents amount.
         employment:
-          $ref: '#/components/schemas/Employment'
+          $ref: '#/components/schemas/EmploymentDTO'
         account:
           type: string
           pattern: '[0-9]{20}'
@@ -209,7 +209,7 @@ components:
           example: true
           description: Is salary client?
 
-    Employment:
+    EmploymentDTO:
       title: Employment
       type: object
       description: Client's employment info.

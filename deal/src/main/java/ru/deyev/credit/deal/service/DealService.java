@@ -4,13 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.deyev.credit.deal.client.ConveyorClient;
-import ru.deyev.credit.deal.model.CreateLoanApplicationRequest;
-import ru.deyev.credit.deal.model.Credit;
-import ru.deyev.credit.deal.model.LoanOffer;
-import ru.deyev.credit.deal.model.ScoringData;
+import ru.deyev.credit.deal.feign.ConveyorFeignClient;
+import ru.deyev.credit.deal.model.CreateLoanApplicationRequestDTO;
+import ru.deyev.credit.deal.model.CreditDTO;
+import ru.deyev.credit.deal.model.LoanOfferDTO;
+import ru.deyev.credit.deal.model.ScoringDataDTO;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -18,17 +17,17 @@ import java.util.List;
 @Slf4j
 public class DealService {
 
-    private final ConveyorClient conveyorClient;
+    private final ConveyorFeignClient conveyorFeignClient;
 
-    public List<LoanOffer> createApplication(@RequestBody CreateLoanApplicationRequest request) {
+    public List<LoanOfferDTO> createApplication(@RequestBody CreateLoanApplicationRequestDTO request) {
 //        TODO save application to db
-        List<LoanOffer> loanOffers = conveyorClient.generateOffers(request);
-        log.info("Received offers: {}", Arrays.deepToString(loanOffers.toArray()));
+        List<LoanOfferDTO> loanOffers = conveyorFeignClient.generateOffers(request).getBody();
+        log.info("Received offers: {}", loanOffers);
         return loanOffers;
     }
 
-    public Credit calculateCredit(ScoringData scoringData) {
+    public CreditDTO calculateCredit(ScoringDataDTO scoringData) {
 //        TODO update application in db
-        return conveyorClient.calculateCredit(scoringData);
+        return conveyorFeignClient.calculateCredit(scoringData).getBody();
     }
 }

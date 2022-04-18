@@ -17,10 +17,10 @@ public class Application {
     private Long id;
 
 //    @Column
-//    private Client client;
+//    private ClientDTO client;
 //
 //    @Column
-//    private Credit credit;
+//    private CreditDTO credit;
 
 //    @Column
 //    private ApplicationStatus status;
@@ -35,5 +35,5 @@ public class Application {
     private Integer sesCode;
 
 //    @Column
-//    private List<ApplicationStatusHistory> statusHistory = new ArrayList<ApplicationStatusHistory>();
+//    private List<ApplicationStatusHistoryDTO> statusHistory = new ArrayList<ApplicationStatusHistoryDTO>();
 }

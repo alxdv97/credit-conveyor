@@ -1,6 +1,7 @@
 package ru.deyev.credit.application.controller;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ public class ApplicationController {
     private final ApplicationService applicationService;
 
     @PostMapping
-    public List<LoanOfferDTO> createApplication(@RequestBody CreateLoanApplicationRequestDTO request) {
-        return applicationService.createLoanApplication(request);
+    public ResponseEntity<List<LoanOfferDTO>> createApplication(@RequestBody CreateLoanApplicationRequestDTO request) {
+        return ResponseEntity.ok(applicationService.createLoanApplication(request));
     }
 }
