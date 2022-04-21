@@ -9,12 +9,12 @@ info:
 servers:
   - url: 'http://localhost:8080/'
     description: 'localhost'
-paths: {}
+paths: { }
 
 components:
   schemas:
-    CreateLoanApplicationRequestDTO:
-      title: Create Loan Application Request
+    LoanApplicationRequestDTO:
+      title: Loan Application Request
       type: object
       description: Short application info.
       required:
@@ -81,6 +81,11 @@ components:
         - isInsuranceEnabled
         - isSalaryClient
       properties:
+        applicationId:
+          type: integer
+          format: int64
+          example: 1
+          description: application id.
         requestedAmount:
           type: number
           format: double

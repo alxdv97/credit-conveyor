@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.deyev.credit.conveyor.model.CreateLoanApplicationRequestDTO;
 import ru.deyev.credit.conveyor.model.CreditDTO;
+import ru.deyev.credit.conveyor.model.LoanApplicationRequestDTO;
 import ru.deyev.credit.conveyor.model.LoanOfferDTO;
 import ru.deyev.credit.conveyor.model.ScoringDataDTO;
 import ru.deyev.credit.conveyor.service.ConveyorFacade;
@@ -24,7 +24,7 @@ public class ConveyorController {
     }
 
     @PostMapping("/offers")
-    public ResponseEntity<List<LoanOfferDTO>> generateOffers(@RequestBody CreateLoanApplicationRequestDTO request) {
+    public ResponseEntity<List<LoanOfferDTO>> generateOffers(@RequestBody LoanApplicationRequestDTO request) {
         return ResponseEntity.ok(service.generateOffers(request));
     }
 

@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.deyev.credit.gateway.api.ApplicationApi;
-import ru.deyev.credit.gateway.model.CreateLoanApplicationRequestDTO;
 import ru.deyev.credit.gateway.model.FinishRegistrationRequestDTO;
+import ru.deyev.credit.gateway.model.LoanApplicationRequestDTO;
 import ru.deyev.credit.gateway.model.LoanOfferDTO;
 import ru.deyev.credit.gateway.service.ApplicationService;
 
@@ -18,13 +18,14 @@ public class ApplicationController implements ApplicationApi {
     private final ApplicationService applicationService;
 
     @Override
-    public ResponseEntity<Void> applyOffer(Integer offerId) {
-        return ApplicationApi.super.applyOffer(offerId);
+    public ResponseEntity<Void> applyOffer(LoanOfferDTO loanOfferDTO) {
+        applicationService.applyOffer(loanOfferDTO);
+        return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<List<LoanOfferDTO>> createLoanApplication(CreateLoanApplicationRequestDTO createLoanApplicationRequestDTO) {
-        return ResponseEntity.ok(applicationService.createLoanApplication(createLoanApplicationRequestDTO));
+    public ResponseEntity<List<LoanOfferDTO>> createLoanApplication(LoanApplicationRequestDTO loanApplicationRequestDTO) {
+        return ResponseEntity.ok(applicationService.createLoanApplication(loanApplicationRequestDTO));
     }
 
     @Override

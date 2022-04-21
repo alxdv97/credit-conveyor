@@ -28,17 +28,23 @@
             <column name="client_id" type="BIGINT"/>
             <column name="credit_id" type="BIGINT"/>
             <column name="status" type="VARCHAR(50)"/>
-            <column name="sign_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="sign_date" type="DATE"/>
             <column name="ses_code" type="INT"/>
-            <column name="creation_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="creation_date" type="DATE"/>
             <column name="status_history" type="JSONB"/>
+            <column name="applied_offer" type="JSONB"/>
         </createTable>
     </changeSet>
 
 
     <changeSet id="v1.0.01_add_application_pk" author="Alexey_Deyev">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="application"/>
+            <not>
+                <primaryKeyExists primaryKeyName="application_pk"/>
+            </not>
+        </preConditions>
         <addPrimaryKey columnNames="id" constraintName="application_pk" tableName="application"/>
     </changeSet>
-
 
 </databaseChangeLog>

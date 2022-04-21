@@ -32,11 +32,19 @@
             <column name="is_insurance_enabled" type="BOOLEAN"/>
             <column name="is_salary_client" type="BOOLEAN"/>
             <column name="payment_schedule" type="JSONB"/>
+            <column name="application_id" type="BIGINT"/>
+            <column name="client_id" type="BIGINT"/>
         </createTable>
     </changeSet>
 
 
     <changeSet id="v1.0.02_add_credit_pk" author="Alexey_Deyev">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="credit"/>
+            <not>
+                <primaryKeyExists primaryKeyName="credit_pk"/>
+            </not>
+        </preConditions>
         <addPrimaryKey columnNames="id" constraintName="credit_pk" tableName="credit"/>
     </changeSet>
 

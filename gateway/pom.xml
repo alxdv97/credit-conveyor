@@ -104,7 +104,11 @@
                                 <typeMapping>double=java.math.BigDecimal</typeMapping>
                                 <typeMapping>date=java.time.LocalDate</typeMapping>
                                 <typeMapping>date-time=java.time.LocalDateTime</typeMapping>
+                                <typeMapping>Date=LocalDateTime</typeMapping>
                             </typeMappings>
+                            <importMappings>
+                                <importMapping>java.util.Date=java.time.LocalDateTime</importMapping>
+                            </importMappings>
                             <inputSpec>${project.basedir}/src/main/resources/open-api/credit-conveyor-api.yaml</inputSpec>
                             <configOptions>
                                 <delegatePattern>false</delegatePattern>

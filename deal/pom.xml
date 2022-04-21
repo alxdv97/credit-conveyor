@@ -75,6 +75,11 @@
             <artifactId>jackson-databind-nullable</artifactId>
             <version>0.2.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.vladmihalcea</groupId>
+            <artifactId>hibernate-types-52</artifactId>
+            <version>2.15.1</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -120,7 +125,11 @@
                                 <typeMapping>double=java.math.BigDecimal</typeMapping>
                                 <typeMapping>date=java.time.LocalDate</typeMapping>
                                 <typeMapping>date-time=java.time.LocalDateTime</typeMapping>
+                                <typeMapping>Date=LocalDateTime</typeMapping>
                             </typeMappings>
+                            <importMappings>
+                                <importMapping>java.util.Date=java.time.LocalDateTime</importMapping>
+                            </importMappings>
                             <inputSpec>${project.basedir}/src/main/resources/open-api/deal-dtos.yaml</inputSpec>
                             <configOptions>
                                 <delegatePattern>false</delegatePattern>

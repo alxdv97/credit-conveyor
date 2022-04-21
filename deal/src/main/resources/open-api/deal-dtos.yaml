@@ -9,12 +9,12 @@ info:
 servers:
   - url: 'http://localhost:8080/'
     description: 'localhost'
-paths: {}
+paths: { }
 
 components:
   schemas:
-    CreateLoanApplicationRequestDTO:
-      title: Create Loan Application Request
+    LoanApplicationRequestDTO:
+      title: Loan Application Request
       type: object
       description: Short application info.
       required:
@@ -81,6 +81,11 @@ components:
         - isInsuranceEnabled
         - isSalaryClient
       properties:
+        applicationId:
+          type: integer
+          format: int64
+          example: 1
+          description: application id.
         requestedAmount:
           type: number
           format: double
@@ -330,3 +335,33 @@ components:
           format: double
           example: 92000.00
           description: Remaining debt amount.
+    ApplicationStatusHistoryDTO:
+      title: Application Status History
+      type: object
+      description: Application Status Changing History.
+      properties:
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        time:
+          type: string
+          format: date-time
+        changeType:
+          type: string
+          enum:
+            - AUTOMATIC
+            - MANUAL
+    ApplicationStatus:
+      type: string
+      enum:
+        - REQUEST_DENIED
+        - PREAPPROVAL
+        - APPROVED
+        - CC_DENIED
+        - CC_APPROVED
+        - PREPARE_DOCUMENTS
+        - DOCUMENT_CREATED
+        - CLIENT_DENIED
+        - DOCUMENT_SIGNED
+        - CREDIT_ISSUED
+      example: APPROVED
+      description: Application status.

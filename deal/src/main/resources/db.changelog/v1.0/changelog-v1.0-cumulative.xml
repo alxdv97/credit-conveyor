@@ -8,5 +8,8 @@
     <include file="v1.0_01_add_application_table.xml" relativeToChangelogFile="true"/>
     <include file="v1.0_02_add_credit_table.xml" relativeToChangelogFile="true"/>
     <include file="v1.0_03_add_client_table.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0_04_add_application_fk.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0_05_add_credit_fk.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0_06_add_client_fk.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

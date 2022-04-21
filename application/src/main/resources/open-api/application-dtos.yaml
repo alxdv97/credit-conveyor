@@ -9,12 +9,12 @@ info:
 servers:
   - url: 'http://localhost:8081/'
     description: 'localhost'
-paths: {}
+paths: { }
 
 components:
   schemas:
-    CreateLoanApplicationRequestDTO:
-      title: Create Loan Application Request
+    LoanApplicationRequestDTO:
+      title: Loan Application Request
       type: object
       description: Short application info.
       required:
@@ -80,6 +80,11 @@ components:
         - isInsuranceEnabled
         - isSalaryClient
       properties:
+        applicationId:
+          type: integer
+          format: int64
+          example: 1
+          description: application id.
         requestedAmount:
           type: number
           format: double
@@ -308,6 +313,10 @@ components:
           type: string
           example: Ivanonovich
           description: Middle name (if present).
+        email:
+          type: string
+          example: iivanov@email.com
+          description: Client's email.
         gender:
           type: string
           example: MALE
