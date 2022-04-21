@@ -7,7 +7,7 @@ info:
     url: 'https://github.com/alxdv97'
   version: 5.0-oas3
 servers:
-  - url: 'http://localhost:8081/'
+  - url: 'http://localhost:8080/'
     description: 'localhost'
 paths: { }
 
@@ -73,7 +73,8 @@ components:
       type: object
       description: Loan offer after short scoring.
       required:
-        - amount
+        - requestedAmount
+        - totalAmount
         - term
         - monthlyPayment
         - rate
@@ -121,19 +122,37 @@ components:
           example: true
           description: Is salary client?
 
-    FinishRegistrationRequestDTO:
-      title: Finish registration request
+    ScoringDataDTO:
+      title: Scoring Data
       type: object
-      description: Finish registration request with full client data.
-      required:
-        - gender
-        - maritalStatus
-        - dependentAmount
-        - passportIssueDate
-        - passportIssueBranch
-        - employment
-        - account
+      description: Full scoring data.
       properties:
+        amount:
+          type: number
+          format: double
+          example: 1000000
+          minimum: 10000
+          description: Requested loan amount.
+        term:
+          type: integer
+          example: 24
+          minimum: 6
+          description: Requested loan term (months).
+        firstName:
+          type: string
+          example: Ivan
+          pattern: '[A-Za-z\-]{2,30}'
+          description: Client's first name
+        lastName:
+          type: string
+          example: Ivanov
+          pattern: '[A-Za-z\-]{2,30}'
+          description: Client's last name
+        middleName:
+          type: string
+          example: Ivanonovich
+          pattern: '[A-Za-z]{2,30}'
+          description: Client's middle name (if present).
         gender:
           type: string
           enum:
@@ -142,6 +161,30 @@ components:
             - NON_BINARY
           example: MALE
           description: Client's gender.
+        birthdate:
+          type: string
+          format: date
+          example: 1996-11-27
+          description: Client's birthdate
+        passportSeries:
+          type: string
+          example: 1234
+          pattern: '[0-9]{4}'
+          description: Client's passport series
+        passportNumber:
+          type: string
+          example: 123456
+          pattern: '[0-9]{6}'
+          description: Client's passport series
+        passportIssueDate:
+          type: string
+          format: date
+          example: 2016-11-27
+          description: Client's passport issue date.
+        passportIssueBranch:
+          type: string
+          example: 123-456
+          description: Client's passport issue branch.
         maritalStatus:
           type: string
           enum:
@@ -155,15 +198,6 @@ components:
           type: integer
           example: 1
           description: Client's dependents amount.
-        passportIssueDate:
-          type: string
-          format: date
-          example: 2016-11-27
-          description: Client's passport issue date.
-        passportIssueBranch:
-          type: string
-          example: 123-456
-          description: Client's passport issue branch.
         employment:
           $ref: '#/components/schemas/EmploymentDTO'
         account:
@@ -171,6 +205,14 @@ components:
           pattern: '[0-9]{20}'
           example: 11223344556677889900
           description: Client's master account.
+        isInsuranceEnabled:
+          type: boolean
+          example: true
+          description: Is insurance enabled?
+        isSalaryClient:
+          type: boolean
+          example: true
+          description: Is salary client?
 
     EmploymentDTO:
       title: Employment
@@ -216,158 +258,16 @@ components:
           example: 2
           description: Client's work experience in current job.
 
-    SesCodeDTO:
-      title: Simple Electric Sign code
-      type: integer
-      pattern: '[0-9]{4}'
-      example: 1234
-      description: Simple Electric Sign code for signing documents.
-
-    ApplicationDTO:
-      title: Application
-      type: object
-      description: All application info.
-      required:
-        - id
-        - status
-        - client
-        - creationDate
-        - statusHistory
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 123
-          description: Application id.
-        client:
-          $ref: '#/components/schemas/ClientDTO'
-        credit:
-          $ref: '#/components/schemas/CreditDTO'
-        status:
-          $ref: '#/components/schemas/ApplicationStatus'
-        creationDate:
-          type: string
-          format: date-time
-          example: 2022-05-01
-          description: 'Application creation date'
-        signDate:
-          type: string
-          format: date-time
-          example: 2022-05-01
-          description: 'Application sign date'
-        sesCode:
-          type: string
-          example: 1234
-          description: 'Application Simple Electric Sign code'
-        statusHistory:
-          type: array
-          items:
-            $ref: '#/components/schemas/ApplicationStatusHistoryDTO'
-
-    ApplicationStatusHistoryDTO:
-      title: Application Status History
-      type: object
-      description: Application Status Changing History.
-      properties:
-        status:
-          $ref: '#/components/schemas/ApplicationStatus'
-        time:
-          type: string
-          format: date-time
-        changeType:
-          type: string
-          enum:
-            - AUTOMATIC
-            - MANUAL
-
-    ApplicationStatus:
-      type: string
-      enum:
-        - REQUEST_DENIED
-        - PREAPPROVAL
-        - APPROVED
-        - CC_DENIED
-        - CC_APPROVED
-        - PREPARE_DOCUMENTS
-        - DOCUMENT_CREATED
-        - CLIENT_DENIED
-        - DOCUMENT_SIGNED
-        - CREDIT_ISSUED
-      example: APPROVED
-      description: Application status.
-
-    ClientDTO:
-      title: Client
-      type: object
-      description: Client's info.
-      properties:
-        firstName:
-          type: string
-          example: Ivan
-          description: First name
-        lastName:
-          type: string
-          example: Ivanov
-          description: Last name
-        middleName:
-          type: string
-          example: Ivanonovich
-          description: Middle name (if present).
-        email:
-          type: string
-          example: iivanov@email.com
-          description: Client's email.
-        gender:
-          type: string
-          example: MALE
-          description: Client's gender.
-        birthdate:
-          type: string
-          format: date
-          example: 1996-11-27
-          description: Client's birthdate
-        passportSeries:
-          type: string
-          example: 1234
-          description: Client's passport series
-        passportNumber:
-          type: string
-          example: 123456
-          description: Client's passport series
-        passportIssueDate:
-          type: string
-          format: date
-          example: 2016-11-27
-          description: Client's passport issue date.
-        passportIssueBranch:
-          type: string
-          example: 123-456
-          description: Client's passport issue branch.
-        maritalStatus:
-          type: string
-          example: SINGLE
-          description: Client's marital status.
-        dependentAmount:
-          type: integer
-          example: 1
-          description: Client's dependents amount.
-        employment:
-          $ref: '#/components/schemas/EmploymentDTO'
-        account:
-          type: string
-          example: 11223344556677889900
-          description: Client's master account.
-
 
     CreditDTO:
-      title: Credit
+      title: CreditDTO
       type: object
       description: Credit's info.
       properties:
         amount:
           type: number
           format: double
-          example: 1000000
+          example: 1000000.00
           description: Requested loan amount.
         term:
           type: integer
@@ -425,13 +325,43 @@ components:
           format: double
           example: 12000.00
           description: Interest payment amount.
-        loanPayment:
+        debtPayment:
           type: number
           format: double
           example: 8000.00
-          description: Loan payment amount.
+          description: Main debt payment amount.
         remainingDebt:
           type: number
           format: double
           example: 92000.00
           description: Remaining debt amount.
+    ApplicationStatusHistoryDTO:
+      title: Application Status History
+      type: object
+      description: Application Status Changing History.
+      properties:
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        time:
+          type: string
+          format: date-time
+        changeType:
+          type: string
+          enum:
+            - AUTOMATIC
+            - MANUAL
+    ApplicationStatus:
+      type: string
+      enum:
+        - REQUEST_DENIED
+        - PREAPPROVAL
+        - APPROVED
+        - CC_DENIED
+        - CC_APPROVED
+        - PREPARE_DOCUMENTS
+        - DOCUMENT_CREATED
+        - CLIENT_DENIED
+        - DOCUMENT_SIGNED
+        - CREDIT_ISSUED
+      example: APPROVED
+      description: Application status.

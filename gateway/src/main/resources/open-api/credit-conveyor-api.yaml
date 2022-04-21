@@ -10,7 +10,7 @@ servers:
   - url: 'http://localhost:8880/'
     description: 'localhost'
 paths:
-  /application/:
+  /application:
     post:
       summary: Create loan application
       operationId: createLoanApplication
@@ -20,7 +20,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateLoanApplicationRequestDTO'
+              $ref: '#/components/schemas/LoanApplicationRequestDTO'
       responses:
         '200':
           description: OK
@@ -33,7 +33,7 @@ paths:
         '400':
           description: Bad Request
 
-  /application/deny/:
+  /application/deny:
     post:
       summary: Deny application
       operationId: denyLoanApplication
@@ -42,18 +42,22 @@ paths:
         '200':
           description: OK
 
-  /application/apply/{offerId}:
-    parameters:
-      - $ref: '#/components/parameters/offerId'
+  /application/apply:
     post:
       summary: Apply offer
       operationId: applyOffer
       description: Apply one of present offers.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanOfferDTO'
       responses:
         '200':
           description: OK
 
-  /application/registration/:
+  /application/registration:
     post:
       summary: Finish registration
       operationId: finishRegistration
@@ -68,7 +72,7 @@ paths:
         '200':
           description: OK
 
-  /document/:
+  /document:
     post:
       summary: Create documents
       operationId: createDocuments
@@ -77,7 +81,7 @@ paths:
         '200':
           description: OK
 
-  /document/sign/:
+  /document/sign:
     post:
       summary: Sign documents
       operationId: signDocuments
@@ -120,7 +124,7 @@ paths:
         '404':
           description: Application not found
 
-  /admin/application/:
+  /admin/application:
     get:
       summary: Get all applications
       operationId: getAllApplications
@@ -194,8 +198,8 @@ components:
         description: Application id.
 
   schemas:
-    CreateLoanApplicationRequestDTO:
-      title: Create Loan Application Request
+    LoanApplicationRequestDTO:
+      title: Loan Application Request
       type: object
       description: Short application info.
       required:
@@ -208,7 +212,8 @@ components:
         - passportNumber
       properties:
         amount:
-          type: integer
+          type: number
+          format: double
           example: 1000000
           minimum: 10000
           description: Requested loan amount.
@@ -261,6 +266,11 @@ components:
         - isInsuranceEnabled
         - isSalaryClient
       properties:
+        applicationId:
+          type: integer
+          format: int64
+          example: 1
+          description: application id.
         requestedAmount:
           type: number
           format: double
@@ -411,7 +421,8 @@ components:
         - statusHistory
       properties:
         id:
-          type: string
+          type: integer
+          format: int64
           example: 123
           description: Application id.
         client:
@@ -488,6 +499,10 @@ components:
           type: string
           example: Ivanonovich
           description: Middle name (if present).
+        email:
+          type: string
+          example: iivanov@email.com
+          description: Client's email.
         gender:
           type: string
           example: MALE
@@ -536,8 +551,8 @@ components:
       description: Credit's info.
       properties:
         amount:
-          type: integer
-          format: int64
+          type: number
+          format: double
           example: 1000000
           description: Requested loan amount.
         term:

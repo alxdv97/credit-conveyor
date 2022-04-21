@@ -9,12 +9,12 @@ info:
 servers:
   - url: 'http://localhost:8080/'
     description: 'localhost'
-paths: {}
+paths: { }
 
 components:
   schemas:
-    CreateLoanApplicationRequest:
-      title: Create Loan Application Request
+    LoanApplicationRequestDTO:
+      title: Loan Application Request
       type: object
       description: Short application info.
       required:
@@ -27,7 +27,8 @@ components:
         - passportNumber
       properties:
         amount:
-          type: integer
+          type: number
+          format: double
           example: 1000000
           minimum: 10000
           description: Requested loan amount.
@@ -67,7 +68,7 @@ components:
           pattern: '[0-9]{6}'
           description: Client's passport series
 
-    LoanOffer:
+    LoanOfferDTO:
       title: Loan offer
       type: object
       description: Loan offer after short scoring.
@@ -80,6 +81,11 @@ components:
         - isInsuranceEnabled
         - isSalaryClient
       properties:
+        applicationId:
+          type: integer
+          format: int64
+          example: 1
+          description: application id.
         requestedAmount:
           type: number
           format: double
@@ -116,13 +122,14 @@ components:
           example: true
           description: Is salary client?
 
-    ScoringData:
+    ScoringDataDTO:
       title: Scoring Data
       type: object
       description: Full scoring data.
       properties:
         amount:
-          type: integer
+          type: number
+          format: double
           example: 1000000
           minimum: 10000
           description: Requested loan amount.
@@ -192,7 +199,7 @@ components:
           example: 1
           description: Client's dependents amount.
         employment:
-          $ref: '#/components/schemas/Employment'
+          $ref: '#/components/schemas/EmploymentDTO'
         account:
           type: string
           pattern: '[0-9]{20}'
@@ -207,7 +214,7 @@ components:
           example: true
           description: Is salary client?
 
-    Employment:
+    EmploymentDTO:
       title: Employment
       type: object
       description: Client's employment info.
@@ -252,7 +259,7 @@ components:
           description: Client's work experience in current job.
 
 
-    Credit:
+    CreditDTO:
       title: Credit
       type: object
       description: Credit's info.

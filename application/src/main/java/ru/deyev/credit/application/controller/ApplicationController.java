@@ -1,8 +1,33 @@
 package ru.deyev.credit.application.controller;
 
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.deyev.credit.application.model.LoanApplicationRequestDTO;
+import ru.deyev.credit.application.model.LoanOfferDTO;
+import ru.deyev.credit.application.service.ApplicationService;
+
+import java.util.List;
 
 @RestController
+@RequestMapping("/application")
+@AllArgsConstructor
 public class ApplicationController {
 
+    private final ApplicationService applicationService;
+
+    @PostMapping
+    public ResponseEntity<List<LoanOfferDTO>> createApplication(@RequestBody LoanApplicationRequestDTO request) {
+        return ResponseEntity.ok(applicationService.createLoanApplication(request));
+    }
+
+    @PutMapping("/offer")
+    public ResponseEntity<Void> applyOffer(@RequestBody LoanOfferDTO loanOfferDTO) {
+        applicationService.applyOffer(loanOfferDTO);
+        return ResponseEntity.ok().build();
+    }
 }
