@@ -1,8 +1,8 @@
 package ru.deyev.credit.conveyor.service;
 
 import org.springframework.stereotype.Service;
-import ru.deyev.credit.conveyor.model.CreateLoanApplicationRequest;
-import ru.deyev.credit.conveyor.model.LoanOffer;
+import ru.deyev.credit.conveyor.model.LoanApplicationRequestDTO;
+import ru.deyev.credit.conveyor.model.LoanOfferDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,7 +16,7 @@ public class OfferService {
         this.scoringService = scoringService;
     }
 
-    public List<LoanOffer> generateOffers(CreateLoanApplicationRequest request) {
+    public List<LoanOfferDTO> generateOffers(LoanApplicationRequestDTO request) {
         return List.of(
                 createOffer(false, false, request),
                 createOffer(true, false, request),
@@ -25,17 +25,17 @@ public class OfferService {
         );
     }
 
-    private LoanOffer createOffer(Boolean isInsuranceEnabled,
-                                  Boolean isSalaryClient,
-                                  CreateLoanApplicationRequest request) {
+    private LoanOfferDTO createOffer(Boolean isInsuranceEnabled,
+                                     Boolean isSalaryClient,
+                                     LoanApplicationRequestDTO request) {
 
-        BigDecimal totalAmount = scoringService.evaluateTotalAmountByServices(new BigDecimal(request.getAmount()),
+        BigDecimal totalAmount = scoringService.evaluateTotalAmountByServices(request.getAmount(),
                 isInsuranceEnabled);
 
         BigDecimal rate = scoringService.calculateRate(isInsuranceEnabled, isSalaryClient);
 
-        return new LoanOffer()
-                .requestedAmount(new BigDecimal(request.getAmount()))
+        return new LoanOfferDTO()
+                .requestedAmount(request.getAmount())
                 .totalAmount(totalAmount)
                 .term(request.getTerm())
                 .isInsuranceEnabled(isInsuranceEnabled)

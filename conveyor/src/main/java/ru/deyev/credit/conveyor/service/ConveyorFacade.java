@@ -1,10 +1,10 @@
 package ru.deyev.credit.conveyor.service;
 
 import org.springframework.stereotype.Service;
-import ru.deyev.credit.conveyor.model.CreateLoanApplicationRequest;
-import ru.deyev.credit.conveyor.model.Credit;
-import ru.deyev.credit.conveyor.model.LoanOffer;
-import ru.deyev.credit.conveyor.model.ScoringData;
+import ru.deyev.credit.conveyor.model.CreditDTO;
+import ru.deyev.credit.conveyor.model.LoanApplicationRequestDTO;
+import ru.deyev.credit.conveyor.model.LoanOfferDTO;
+import ru.deyev.credit.conveyor.model.ScoringDataDTO;
 
 import java.util.List;
 
@@ -12,6 +12,7 @@ import java.util.List;
 public class ConveyorFacade {
 
     private final OfferService offerService;
+
     private final ScoringService scoringService;
 
     public ConveyorFacade(OfferService offerService, ScoringService scoringService) {
@@ -19,11 +20,11 @@ public class ConveyorFacade {
         this.scoringService = scoringService;
     }
 
-    public List<LoanOffer> generateOffers(CreateLoanApplicationRequest request) {
+    public List<LoanOfferDTO> generateOffers(LoanApplicationRequestDTO request) {
         return offerService.generateOffers(request);
     }
 
-    public Credit calculateCredit(ScoringData scoringData) {
+    public CreditDTO calculateCredit(ScoringDataDTO scoringData) {
         return scoringService.calculateCredit(scoringData);
     }
 

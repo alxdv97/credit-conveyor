@@ -2,9 +2,9 @@ package ru.deyev.credit.conveyor.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.deyev.credit.conveyor.model.Credit;
+import ru.deyev.credit.conveyor.model.CreditDTO;
 import ru.deyev.credit.conveyor.model.PaymentScheduleElement;
-import ru.deyev.credit.conveyor.model.ScoringData;
+import ru.deyev.credit.conveyor.model.ScoringDataDTO;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,21 +17,28 @@ import java.util.List;
 public class ScoringService {
 
     private static final String FUNDING_RATE = "15.00";
+
     private static final String INSURANCE_DISCOUNT = "4.00";
+
     private static final String SALARY_CLIENT_DISCOUNT = "1.00";
+
     private static final String INSURANCE_BASE_PRICE = "10000.00";
+
     private static final String BASE_LOAN_AMOUNT = "200000.00";
+
     private static final String INSURANCE_LOAN_AMOUNT_MULTIPLICAND = "0.05";
+
     private static final Integer BASE_PERIODS_AMOUNT_IN_YEAR = 12;
+
     private static final Integer DEFAULT_DECIMAL_SCALE = 2;
 
 
-    public Credit calculateCredit(ScoringData scoringData) {
+    public CreditDTO calculateCredit(ScoringDataDTO scoringData) {
 
-        BigDecimal totalAmount = evaluateTotalAmountByServices(new BigDecimal(scoringData.getAmount()),
+        BigDecimal totalAmount = evaluateTotalAmountByServices(scoringData.getAmount(),
                 scoringData.getIsInsuranceEnabled());
 
-        BigDecimal requestedAmount = BigDecimal.valueOf(scoringData.getAmount());
+        BigDecimal requestedAmount = scoringData.getAmount();
 
         BigDecimal rate = calculateRate(scoringData.getIsInsuranceEnabled(), scoringData.getIsSalaryClient());
 
@@ -42,7 +49,7 @@ public class ScoringService {
         List<PaymentScheduleElement> paymentSchedule = calculatePaymentSchedule(totalAmount, scoringData.getTerm(), rate, monthlyPayment);
 
 
-        return new Credit()
+        return new CreditDTO()
                 .amount(totalAmount)
                 .monthlyPayment(calculateMonthlyPayment(totalAmount, term, rate))
                 .psk(calculatePSK(paymentSchedule, requestedAmount, term))
