@@ -2,21 +2,25 @@ package ru.deyev.credit.conveyor.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.deyev.credit.conveyor.exception.ScoringException;
 import ru.deyev.credit.conveyor.model.CreditDTO;
+import ru.deyev.credit.conveyor.model.EmploymentDTO;
 import ru.deyev.credit.conveyor.model.PaymentScheduleElement;
 import ru.deyev.credit.conveyor.model.ScoringDataDTO;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
 @Service
 public class ScoringService {
 
-    private static final String FUNDING_RATE = "15.00";
+    private static String FUNDING_RATE = "15.00";
 
     private static final String INSURANCE_DISCOUNT = "4.00";
 
@@ -34,6 +38,8 @@ public class ScoringService {
 
 
     public CreditDTO calculateCredit(ScoringDataDTO scoringData) {
+
+        scoring(scoringData);
 
         BigDecimal totalAmount = evaluateTotalAmountByServices(scoringData.getAmount(),
                 scoringData.getIsInsuranceEnabled());
@@ -97,7 +103,7 @@ public class ScoringService {
 //              МП - месячная процентная ставка
 //              К = (1 + МП)^КП, где
 //                КП - количество платежей
-        log.info("Calculating monthly payment -----------------------");
+        log.info("-------------- Calculating monthly payment --------------");
         log.info("totalAmount = {}, term = {}, rate = {}", totalAmount, term, rate);
 
         BigDecimal monthlyRateAbsolute = rate.divide(BigDecimal.valueOf(100), 5, RoundingMode.CEILING);
@@ -116,7 +122,7 @@ public class ScoringService {
 
         BigDecimal monthlyPayment = totalAmount.multiply(annuityCoefficient).setScale(2, RoundingMode.CEILING);
         log.info("monthlyPayment = {}", monthlyPayment);
-        log.info("End calculating monthly payment -------------------");
+        log.info("-------------- End calculating monthly payment --------------");
         return monthlyPayment;
     }
 
@@ -132,7 +138,7 @@ public class ScoringService {
 //
 //          Г — срок кредитования в годах;
 
-        log.info("Calculating PSK ----------------------------");
+        log.info("-------------- Calculating PSK --------------");
         BigDecimal paymentAmount = paymentSchedule
                 .stream()
                 .map(PaymentScheduleElement::getTotalPayment)
@@ -151,7 +157,7 @@ public class ScoringService {
         BigDecimal psk = intermediateCoefficient.divide(termInYears, 3, RoundingMode.CEILING)
                 .multiply(BigDecimal.valueOf(100));
         log.info("psk = {}", psk);
-        log.info("End calculating PSK ------------------------");
+        log.info("-------------- End calculating PSK --------------");
 
         return psk;
     }
@@ -201,5 +207,110 @@ public class ScoringService {
 
     public BigDecimal divideWithScaleAndRoundingMode(BigDecimal number, BigDecimal divisor) {
         return number.divide(divisor, DEFAULT_DECIMAL_SCALE, RoundingMode.CEILING);
+    }
+
+    /* Правила скоринга:
+     *
+     *  Безработный -> отказ; Самозанятый -> ставка увеличивается на 1; Владелец бизнеса -> ставка увеличивается на 3
+     *  Позиция Менеджер среднего звена -> ставка уменьшается на 2; Позиция Топ-менеджер -> ставка уменьшается на 4
+     *  Сумма займа > зарплата*20 -> отказ
+     *  Замужем/Женат -> ставка уменьшается на 3; Разведен -> ставка увеличивается на 1
+     *  Количество иждивенцев > 1 -> ставка увеличивается на 1
+     *  Возраст < 20 или > 60 -> отказ
+     *  Срок кредита < 1 год -> ставка увеличивается на 5; Срок кредита >= 10 лет -> ставка уменьшается на 2
+     *  Пол не бинарный - ставка увеличивается на 3; Женщина от 35 до 60 лет - ставка уменьшается на 3; Мужчина от 30 до 55 лет - ставка уменьшается на 3
+     *  Общий стаж работы < 1 года - отказ; Текущий стаж работы < 3 месяцев - отказ
+     * */
+    public void scoring(ScoringDataDTO scoringData) {
+
+        log.info("-------------- Start scoring process for client {} {} {} --------------",
+                scoringData.getLastName(), scoringData.getFirstName(), scoringData.getMiddleName());
+
+        List<String> scoringRefuseCauses = new ArrayList<>();
+
+        EmploymentDTO employment = scoringData.getEmployment();
+
+        if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.UNEMPLOYED) {
+            scoringRefuseCauses.add("Refuse cause: Client unemployed.");
+        } else if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.SELF_EMPLOYED) {
+            log.info("Funding rate increases by 1 percent point because employment status = SELF_EMPLOYED");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.ONE).toString();
+        } else if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.BUSINESS_OWNER) {
+            log.info("Funding rate increases by 3 percent point because employment status = BUSINESS_OWNER");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.valueOf(3)).toString();
+        }
+
+        if (employment.getPosition() == EmploymentDTO.PositionEnum.MID_MANAGER) {
+            log.info("Funding rate decreases by 2 percent point because employment position = MID_MANAGER");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(2)).toString();
+        }
+
+        if (employment.getPosition() == EmploymentDTO.PositionEnum.TOP_MANAGER) {
+            log.info("Funding rate decreases by 4 percent point because employment position = TOP_MANAGER");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(4)).toString();
+        }
+
+        if (scoringData.getAmount()
+                .compareTo(employment.getSalary().multiply(BigDecimal.valueOf(20))) > 0) {
+            scoringRefuseCauses.add("Refuse cause: Too much loan amount due to client's salary.");
+        }
+
+        if (scoringData.getDependentAmount() > 1) {
+            log.info("Funding rate increases by 1 percent point because dependent amount > 1");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.ONE).toString();
+        }
+
+        if (scoringData.getMaritalStatus() == ScoringDataDTO.MaritalStatusEnum.MARRIED) {
+            log.info("Funding rate decreases by 3 percent point because marital status = MARRIED");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(3)).toString();
+        } else if (scoringData.getMaritalStatus() == ScoringDataDTO.MaritalStatusEnum.DIVORCED) {
+            log.info("Funding rate increases by 1 percent point because marital status = DIVORCED");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.ONE).toString();
+        }
+
+        long clientAge = ChronoUnit.YEARS.between(scoringData.getBirthdate(), LocalDate.now());
+        if (clientAge > 60) {
+            scoringRefuseCauses.add("Refuse cause: Client too old.");
+        } else if (clientAge < 20) {
+            scoringRefuseCauses.add("Refuse cause: Client too young.");
+        }
+
+        if (scoringData.getTerm() < 12) {
+            log.info("Funding rate increases by 5 percent point because loan term < 12 months");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.valueOf(5)).toString();
+        } else if (scoringData.getTerm() >= 120) {
+            log.info("Funding rate decreases by 2 percent point because loan term >= 120 months");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(2)).toString();
+        }
+
+        if (scoringData.getGender() == ScoringDataDTO.GenderEnum.NON_BINARY) {
+            log.info("Funding rate increases by 3 percent point because gender = NON_BINARY");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.valueOf(3)).toString();
+        } else if (scoringData.getGender() == ScoringDataDTO.GenderEnum.FEMALE && (clientAge > 35 && clientAge < 60)) {
+            log.info("Funding rate decreases by 3 percent point because gender = FEMALE and age between 35 and 60");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(3)).toString();
+        } else if (scoringData.getGender() == ScoringDataDTO.GenderEnum.FEMALE && (clientAge > 30 && clientAge < 55)) {
+            log.info("Funding rate decreases by 3 percent point because gender = MALE and age between 30 and 55");
+            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(3)).toString();
+        }
+
+        if (employment.getWorkExperienceTotal() < 12) {
+            scoringRefuseCauses.add("Refuse cause: Too small total working experience.");
+        }
+        if (employment.getWorkExperienceCurrent() < 3) {
+            scoringRefuseCauses.add("Refuse cause: Too small current working experience.");
+        }
+
+        if (scoringRefuseCauses.size() > 0) {
+            log.info("Scoring errors: {}", Arrays.deepToString(scoringRefuseCauses.toArray()));
+        }
+
+        log.info("-------------- End scoring process for client {} {} {} --------------",
+                scoringData.getLastName(), scoringData.getFirstName(), scoringData.getMiddleName());
+
+        if (scoringRefuseCauses.size() > 0) {
+            throw new ScoringException(Arrays.deepToString(scoringRefuseCauses.toArray()));
+        }
+
     }
 }
