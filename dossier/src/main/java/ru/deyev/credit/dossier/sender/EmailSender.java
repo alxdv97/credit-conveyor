@@ -6,6 +6,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import ru.deyev.credit.dossier.mail.EmailMessage;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -19,7 +20,7 @@ public class EmailSender {
 
     private final JavaMailSender javaMailSender;
 
-    public void sendMessage(String address, String subject,  String text) {
+    public void sendMessage(String address, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("noreply@conveyor.com");
         message.setTo(address);
@@ -28,6 +29,23 @@ public class EmailSender {
 
         log.info("Sending email: \n{}", message);
         javaMailSender.send(message);
+    }
+
+    public void sendMessage(EmailMessage emailMessage) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("noreply@conveyor.com");
+        message.setTo(emailMessage.getAddress());
+        message.setSubject(emailMessage.getSubject());
+        message.setText(emailMessage.getText());
+
+        log.info("Sending email: \n{}", message);
+
+        try {
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            log.warn("Exception while sending email: {}. Please, use no-email flow instead.", e.getMessage());
+            throw new RuntimeException("Exception while sending email" + e.getMessage() + ". Please, use no-email flow instead.");
+        }
     }
 
     public void sendMessageWithAttachment(String address,

@@ -15,5 +15,18 @@ spring:
     user: postgres
     password: 123
     driver-class-name: org.postgresql.Driver
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 server:
   port: 8082
+
+custom:
+  message:
+    topic:
+      finish-registration: 'conveyor-finish-registration'
+      create-documents: 'conveyor-create-documents'
+      send-documents: 'conveyor-send-documents'
+      send-ses: 'conveyor-send-ses'

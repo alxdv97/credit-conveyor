@@ -21,10 +21,10 @@ public class KafkaConsumer {
     public void consumeFinishRegistrationMessage(String message) {
         log.info("Consume finish registration message from kafka: {}", message);
 
-        MessageFromKafka messageFromKafka = messageService.parseMessageFromKafka(message);
+        MessageFromKafka messageFromKafka = messageService.parseMessageFromJSON(message);
         log.info("MessageFromKafka = {}", messageFromKafka);
 
-        EmailMessage emailMessage = messageService.KafkaMessageToEmailMessage(messageFromKafka);
+        EmailMessage emailMessage = messageService.kafkaMessageToEmailMessage(messageFromKafka);
         log.info("EmailMessage = {}", emailMessage);
 
         emailSender.sendMessage(emailMessage.getAddress(), emailMessage.getSubject(), emailMessage.getText());
@@ -34,10 +34,10 @@ public class KafkaConsumer {
     public void consumeCreateDocumentsMessage(String message) {
         log.info("Consume create documents message from kafka: {}", message);
 
-        MessageFromKafka messageFromKafka = messageService.parseMessageFromKafka(message);
+        MessageFromKafka messageFromKafka = messageService.parseMessageFromJSON(message);
         log.info("MessageFromKafka = {}", messageFromKafka);
 
-        EmailMessage emailMessage = messageService.KafkaMessageToEmailMessage(messageFromKafka);
+        EmailMessage emailMessage = messageService.kafkaMessageToEmailMessage(messageFromKafka);
         log.info("EmailMessage = {}", emailMessage);
 
         emailSender.sendMessage(emailMessage.getAddress(), emailMessage.getSubject(), emailMessage.getText());
@@ -47,10 +47,10 @@ public class KafkaConsumer {
     public void consumeSendDocumentsMessage(String message) {
         log.info("Consume send documents message from kafka: {}", message);
 
-        MessageFromKafka messageFromKafka = messageService.parseMessageFromKafka(message);
+        MessageFromKafka messageFromKafka = messageService.parseMessageFromJSON(message);
         log.info("MessageFromKafka = {}", messageFromKafka);
 
-        EmailMessage emailMessage = messageService.KafkaMessageToEmailMessage(messageFromKafka);
+        EmailMessage emailMessage = messageService.kafkaMessageToEmailMessage(messageFromKafka);
         log.info("EmailMessage = {}", emailMessage);
 
         emailSender.sendMessage(emailMessage.getAddress(), emailMessage.getSubject(), emailMessage.getText());
@@ -60,10 +60,10 @@ public class KafkaConsumer {
     public void consumeSendSesMessage(String message) {
         log.info("Consume send ses message from kafka: {}", message);
 
-        MessageFromKafka messageFromKafka = messageService.parseMessageFromKafka(message);
+        MessageFromKafka messageFromKafka = messageService.parseMessageFromJSON(message);
         log.info("MessageFromKafka = {}", messageFromKafka);
 
-        EmailMessage emailMessage = messageService.KafkaMessageToEmailMessage(messageFromKafka);
+        EmailMessage emailMessage = messageService.kafkaMessageToEmailMessage(messageFromKafka);
         log.info("EmailMessage = {}", emailMessage);
 
         emailSender.sendMessage(emailMessage.getAddress(), emailMessage.getSubject(), emailMessage.getText());

@@ -23,17 +23,17 @@ public class AdminController implements AdminApi {
     }
 
     @Override
-    public ResponseEntity<ApplicationDTO> getApplicationById(String applicationId) {
-        return AdminApi.super.getApplicationById(applicationId);
+    public ResponseEntity<ApplicationDTO> getApplicationById(Long applicationId) {
+        return ResponseEntity.ok(adminService.getApplicationById(applicationId));
     }
 
     @Override
-    public ResponseEntity<ApplicationStatus> getApplicationStatusById(String applicationId) {
+    public ResponseEntity<ApplicationStatus> getApplicationStatusById(Long applicationId) {
         return AdminApi.super.getApplicationStatusById(applicationId);
     }
 
     @Override
-    public ResponseEntity<List<ApplicationStatusHistoryDTO>> getApplicationStatusHistoryById(String applicationId) {
+    public ResponseEntity<List<ApplicationStatusHistoryDTO>> getApplicationStatusHistoryById(Long applicationId) {
         return AdminApi.super.getApplicationStatusHistoryById(applicationId);
     }
 }
