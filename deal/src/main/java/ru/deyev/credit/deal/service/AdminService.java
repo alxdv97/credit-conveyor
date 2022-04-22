@@ -48,6 +48,7 @@ public class AdminService {
         if (credit != null) {
             applicationDTO
                     .credit(new CreditDTO()
+                            .id(credit.getId())
                             .amount(credit.getAmount())
                             .paymentSchedule(credit.getPaymentSchedule())
                             .monthlyPayment(credit.getMonthlyPayment())

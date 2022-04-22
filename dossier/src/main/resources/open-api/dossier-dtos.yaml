@@ -63,6 +63,11 @@ components:
       type: object
       description: Credit's info.
       properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: Credit id.
         amount:
           type: number
           format: double

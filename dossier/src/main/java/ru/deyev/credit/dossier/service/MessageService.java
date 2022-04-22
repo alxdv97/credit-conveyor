@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.deyev.credit.dossier.mail.EmailMessage;
-import ru.deyev.credit.dossier.mail.MessageFromKafka;
+import ru.deyev.credit.dossier.model.EmailMessage;
+import ru.deyev.credit.dossier.model.MessageFromKafka;
 import ru.deyev.credit.dossier.sender.EmailSender;
 
 @Service

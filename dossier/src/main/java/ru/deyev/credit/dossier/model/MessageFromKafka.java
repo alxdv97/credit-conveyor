@@ -1,4 +1,4 @@
-package ru.deyev.credit.dossier.mail;
+package ru.deyev.credit.dossier.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,5 +8,5 @@ import lombok.Data;
 public class MessageFromKafka {
     private String address;
     private MessageType theme;
-    private String applicationId;
+    private Long applicationId;
 }
