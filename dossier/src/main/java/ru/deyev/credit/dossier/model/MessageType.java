@@ -1,4 +1,4 @@
-package ru.deyev.credit.dossier.mail;
+package ru.deyev.credit.dossier.model;
 
 public enum MessageType {
     FINISH_REGISTRATION,

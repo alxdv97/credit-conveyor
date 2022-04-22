@@ -4,10 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import ru.deyev.credit.dossier.mail.EmailMessage;
-import ru.deyev.credit.dossier.mail.MessageFromKafka;
+import ru.deyev.credit.dossier.model.EmailMessage;
+import ru.deyev.credit.dossier.model.MessageFromKafka;
 import ru.deyev.credit.dossier.sender.EmailSender;
 import ru.deyev.credit.dossier.service.MessageService;
+import ru.deyev.credit.dossier.service.PrintedFormService;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -16,6 +22,8 @@ public class KafkaConsumer {
 
     private EmailSender emailSender;
     private MessageService messageService;
+
+    private PrintedFormService printedFormService;
 
     @KafkaListener(topics = "conveyor-finish-registration", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeFinishRegistrationMessage(String message) {
@@ -53,7 +61,14 @@ public class KafkaConsumer {
         EmailMessage emailMessage = messageService.kafkaMessageToEmailMessage(messageFromKafka);
         log.info("EmailMessage = {}", emailMessage);
 
-        emailSender.sendMessage(emailMessage.getAddress(), emailMessage.getSubject(), emailMessage.getText());
+        List<File> documents = printedFormService.createDocuments(messageFromKafka.getApplicationId());
+        Map<String, File> documentsWithNames = documents.stream()
+                .collect(Collectors.toMap(File::getName, file -> file));
+
+        emailSender.sendMessageWithAttachment(emailMessage.getAddress(),
+                emailMessage.getSubject(),
+                emailMessage.getText(),
+                documentsWithNames);
     }
 
     @KafkaListener(topics = "conveyor-send-ses", groupId = "${spring.kafka.consumer.group-id}")

@@ -6,7 +6,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
-import ru.deyev.credit.dossier.mail.EmailMessage;
+import ru.deyev.credit.dossier.model.EmailMessage;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
