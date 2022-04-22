@@ -396,12 +396,12 @@ components:
           description: Client's employment position.
         workExperienceTotal:
           type: integer
-          example: 5
-          description: Client's total work experience.
+          example: 15
+          description: Client's total work experience (months).
         workExperienceCurrent:
           type: integer
-          example: 2
-          description: Client's work experience in current job.
+          example: 4
+          description: Client's work experience in current job (months).
 
     SesCodeDTO:
       title: Simple Electric Sign code
