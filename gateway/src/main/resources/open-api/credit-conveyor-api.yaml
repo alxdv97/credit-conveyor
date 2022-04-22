@@ -193,7 +193,8 @@ components:
       in: path
       required: true
       schema:
-        type: string
+        type: integer
+        format: int64
         example: 123
         description: Application id.
 

@@ -1,0 +1,37 @@
+server:
+  port: 8083
+
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: dossier-consumer
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+custom:
+  message:
+    finish-registration:
+      subject: "Finish registration in credit-conveyor"
+      text: "Hello, your loan application approved! Now you should finish registration by the following link: http://localhost:8880/application/registration"
+    create-document:
+      subject: "Create documents for your loan application"
+      text: "Hello, your loan application passed all checks! Now you should send creating documents request by the following link: http://localhost:8880/document"
+    send-document:
+      subject: "Your loan documents"
+      text: "Hello, here it is your loan documents! Now you should send signing documents request by the following link: http://localhost:8880/document/sign/"
+    send-ses:
+      subject: "Your Simple Electric Sign"
+      text: "Hello, here it is your Simple Electric Sign code: {}\n Now you should send this code to: http://localhost:8880/document/sign/code"
