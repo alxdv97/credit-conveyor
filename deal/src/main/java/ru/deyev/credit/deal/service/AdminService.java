@@ -1,14 +1,18 @@
 package ru.deyev.credit.deal.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.deyev.credit.deal.model.*;
 import ru.deyev.credit.deal.repository.ApplicationRepository;
 
+import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AdminService {
 
     private ApplicationRepository applicationRepository;
@@ -74,5 +78,23 @@ public class AdminService {
                 .statusHistory(statusHistory)
                 .status(application.getStatus())
                 .creationDate(application.getCreationDate().atStartOfDay());
+    }
+
+    public void updateApplicationStatusById(Long applicationId, ApplicationStatus status) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new EntityNotFoundException("Application with id " + applicationId + " not found."));
+
+        log.info("Updating application {} status from {} to {}",
+                applicationId, application.getStatus(), status);
+
+        List<ApplicationStatusHistoryDTO> statusHistory = application.getStatusHistory();
+        statusHistory.add(new ApplicationStatusHistoryDTO()
+                .status(status)
+                .time(LocalDateTime.now())
+                .changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC));
+
+        applicationRepository.save(application
+                .setStatus(status)
+                .setStatusHistory(statusHistory));
     }
 }

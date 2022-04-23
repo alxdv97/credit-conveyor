@@ -1,6 +1,6 @@
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
@@ -37,6 +37,18 @@
         </createTable>
     </changeSet>
 
+    <!--  Add column credit_status -->
+    <changeSet id="v1.0.02_add_column_credit_status_to_credit_table" author="Alexey_Deyev">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="credit_status" tableName="credit"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="credit">
+            <column name="credit_status" type="VARCHAR(50)" remarks="credit status enum"/>
+        </addColumn>
+    </changeSet>
 
     <changeSet id="v1.0.02_add_credit_pk" author="Alexey_Deyev">
         <preConditions onFail="MARK_RAN">

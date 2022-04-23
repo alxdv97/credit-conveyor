@@ -1,13 +1,9 @@
 package ru.deyev.credit.deal.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.deyev.credit.deal.model.CreditDTO;
+import org.springframework.web.bind.annotation.*;
 import ru.deyev.credit.deal.model.LoanApplicationRequestDTO;
 import ru.deyev.credit.deal.model.LoanOfferDTO;
 import ru.deyev.credit.deal.model.ScoringDataDTO;
@@ -15,6 +11,7 @@ import ru.deyev.credit.deal.service.DealService;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/deal")
 @AllArgsConstructor
@@ -33,8 +30,11 @@ public class DealController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/calculate")
-    public CreditDTO calculateCredit(@RequestBody ScoringDataDTO scoringData) {
-        return dealService.calculateCredit(scoringData);
+    @PutMapping(("/calculate/{applicationId}"))
+    public ResponseEntity<Void> calculateCredit(@PathVariable Long applicationId, @RequestBody ScoringDataDTO scoringData) {
+        log.info("DealController: calculateCredit() - start, applicationId = {}, scoringData = {}", applicationId, scoringData);
+        dealService.calculateCredit(applicationId, scoringData);
+        log.info("DealController: calculateCredit() - end, credit information sent to client's email");
+        return ResponseEntity.ok().build();
     }
 }

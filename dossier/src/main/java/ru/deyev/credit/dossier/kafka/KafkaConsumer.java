@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import ru.deyev.credit.dossier.feign.DealFeignClient;
+import ru.deyev.credit.dossier.model.ApplicationStatus;
 import ru.deyev.credit.dossier.model.EmailMessage;
 import ru.deyev.credit.dossier.model.MessageFromKafka;
 import ru.deyev.credit.dossier.sender.EmailSender;
@@ -22,8 +24,8 @@ public class KafkaConsumer {
 
     private EmailSender emailSender;
     private MessageService messageService;
-
     private PrintedFormService printedFormService;
+    private DealFeignClient dealFeignClient;
 
     @KafkaListener(topics = "conveyor-finish-registration", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeFinishRegistrationMessage(String message) {
@@ -64,6 +66,8 @@ public class KafkaConsumer {
         List<File> documents = printedFormService.createDocuments(messageFromKafka.getApplicationId());
         Map<String, File> documentsWithNames = documents.stream()
                 .collect(Collectors.toMap(File::getName, file -> file));
+
+        dealFeignClient.updateApplicationStatusById(messageFromKafka.getApplicationId(), ApplicationStatus.DOCUMENT_CREATED.name());
 
         emailSender.sendMessageWithAttachment(emailMessage.getAddress(),
                 emailMessage.getSubject(),

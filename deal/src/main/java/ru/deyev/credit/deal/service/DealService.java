@@ -5,23 +5,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.deyev.credit.deal.feign.ConveyorFeignClient;
-import ru.deyev.credit.deal.model.Application;
-import ru.deyev.credit.deal.model.ApplicationStatusHistoryDTO;
-import ru.deyev.credit.deal.model.Client;
-import ru.deyev.credit.deal.model.CreditDTO;
-import ru.deyev.credit.deal.model.LoanApplicationRequestDTO;
-import ru.deyev.credit.deal.model.LoanOfferDTO;
-import ru.deyev.credit.deal.model.ScoringDataDTO;
+import ru.deyev.credit.deal.model.*;
 import ru.deyev.credit.deal.repository.ApplicationRepository;
 import ru.deyev.credit.deal.repository.ClientRepository;
+import ru.deyev.credit.deal.repository.CreditRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
-import static ru.deyev.credit.deal.model.ApplicationStatus.APPROVED;
-import static ru.deyev.credit.deal.model.ApplicationStatus.PREAPPROVAL;
+import static ru.deyev.credit.deal.model.ApplicationStatus.*;
 import static ru.deyev.credit.deal.model.ApplicationStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC;
+import static ru.deyev.credit.deal.model.ApplicationStatusHistoryDTO.ChangeTypeEnum.MANUAL;
+import static ru.deyev.credit.deal.model.CreditStatus.CALCULATED;
 
 @Service
 @AllArgsConstructor
@@ -34,6 +32,12 @@ public class DealService {
 
     private final ClientRepository clientRepository;
 
+    private final DocumentService documentService;
+
+    private final DossierService dossierService;
+
+    private final CreditRepository creditRepository;
+
     public List<LoanOfferDTO> createApplication(@RequestBody LoanApplicationRequestDTO request) {
         Client newClient = new Client()
                 .setFirstName(request.getFirstName())
@@ -41,7 +45,8 @@ public class DealService {
                 .setLastName(request.getLastName())
                 .setBirthDate(request.getBirthdate())
                 .setPassportSeries(request.getPassportSeries())
-                .setPassportNumber(request.getPassportNumber());
+                .setPassportNumber(request.getPassportNumber())
+                .setEmail(request.getEmail());
 
         Client savedClient = clientRepository.save(newClient);
 
@@ -64,15 +69,77 @@ public class DealService {
         assert loanOffers != null;
         loanOffers.forEach(loanOfferDTO -> loanOfferDTO.setApplicationId(savedApplication.getId()));
 
-
         log.info("createApplication(), savedApplication={}", savedApplication);
         log.info("Received offers: {}", loanOffers);
         return loanOffers;
     }
 
-    public CreditDTO calculateCredit(ScoringDataDTO scoringData) {
-//        TODO update application in db
-        return conveyorFeignClient.calculateCredit(scoringData).getBody();
+    public void calculateCredit(Long applicationId, ScoringDataDTO scoringData) {
+        Application application = applicationRepository.findById(applicationId).orElseThrow(EntityNotFoundException::new);
+        Client client = application.getClient();
+        LoanOfferDTO appliedOffer = application.getAppliedOffer();
+        scoringData
+                .amount(appliedOffer.getTotalAmount())
+                .term(appliedOffer.getTerm())
+                .firstName(client.getFirstName())
+                .middleName(client.getMiddleName())
+                .lastName(client.getLastName())
+                .birthdate(client.getBirthDate())
+                .passportSeries(client.getPassportSeries())
+                .passportNumber(client.getPassportNumber())
+                .isInsuranceEnabled(appliedOffer.getIsInsuranceEnabled())
+                .isSalaryClient(appliedOffer.getIsSalaryClient());
+
+        log.info("calculateCredit(), full scoringData={}", scoringData);
+        CreditDTO creditDTO = null;
+
+        try {
+            creditDTO = conveyorFeignClient.calculateCredit(scoringData).getBody();
+        } catch (Exception e) {
+            log.warn("Credit conveyor denied application by these reasons: {}", e.getMessage());
+            applicationRepository.save(application.setStatus(CC_DENIED));
+        }
+        log.info("calculateCredit(), credit after calculating creditDTO={}", creditDTO);
+
+        assert Objects.nonNull(creditDTO);
+        Credit credit = creditRepository.save(new Credit()
+                .setAmount(creditDTO.getAmount())
+                .setApplication(application)
+                .setClient(client)
+                .setIsInsuranceEnabled(creditDTO.getIsInsuranceEnabled())
+                .setMonthlyPayment(creditDTO.getMonthlyPayment())
+                .setIsSalaryClient(creditDTO.getIsSalaryClient())
+                .setPaymentSchedule(creditDTO.getPaymentSchedule())
+                .setPsk(creditDTO.getPsk())
+                .setRate(creditDTO.getRate())
+                .setTerm(creditDTO.getTerm())
+                .setCreditStatus(CALCULATED));
+        log.info("calculateCredit(), saved credit={}", credit);
+
+        List<ApplicationStatusHistoryDTO> statusHistory = application.getStatusHistory();
+        statusHistory.add(
+                new ApplicationStatusHistoryDTO()
+                        .status(CC_APPROVED)
+                        .time(LocalDateTime.now())
+                        .changeType(AUTOMATIC));
+
+        clientRepository.save(client
+                .setGender(scoringData.getGender().name())
+                .setPassportIssueDate(scoringData.getPassportIssueDate())
+                .setPassportIssueBranch(scoringData.getPassportIssueBranch())
+                .setMaritalStatus(scoringData.getMaritalStatus().name())
+                .setDependentAmount(scoringData.getDependentAmount())
+                .setEmploymentDTO(scoringData.getEmployment())
+                .setAccount(scoringData.getAccount())
+                .setCredit(credit));
+
+        applicationRepository.save(application
+                .setStatus(CC_APPROVED)
+                .setStatusHistory(statusHistory)
+                .setCredit(credit));
+        log.info("calculateCredit(), updated application={}", application);
+
+        documentService.createDocuments(applicationId);
     }
 
     public void applyOffer(LoanOfferDTO loanOfferDTO) {
@@ -83,7 +150,7 @@ public class DealService {
                 new ApplicationStatusHistoryDTO()
                         .status(APPROVED)
                         .time(LocalDateTime.now())
-                        .changeType(AUTOMATIC));
+                        .changeType(MANUAL));
 
         Application updatedApplication = applicationRepository.save(
                 application
@@ -91,6 +158,14 @@ public class DealService {
                         .setAppliedOffer(loanOfferDTO)
                         .setStatusHistory(statusHistory)
         );
+        EmailMessage message = new EmailMessage()
+                .address(updatedApplication.getClient().getEmail())
+                .applicationId(updatedApplication.getId())
+                .theme(EmailMessage.ThemeEnum.FINISH_REGISTRATION);
+        log.info("applyOffer - start sending message to dossier message = {}", message);
+        dossierService.sendMessage(message);
+        log.info("applyOffer - message sent to dossier");
+
         log.info("applyOffer - end, updatedApplication={}", updatedApplication);
     }
 }
