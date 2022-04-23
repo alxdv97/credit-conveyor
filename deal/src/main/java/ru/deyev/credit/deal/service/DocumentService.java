@@ -48,9 +48,9 @@ public class DocumentService {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("Application with id " + applicationId + " not found."));
 
-        if (application.getStatus() != PREPARE_DOCUMENTS) {
+        if (application.getStatus() != ApplicationStatus.CC_APPROVED) {
             throw new DealException("Application " + applicationId + " in status " + application.getStatus()
-                    + ", but should be in status " + PREPARE_DOCUMENTS);
+                    + ", but should be in status " + ApplicationStatus.CC_APPROVED);
         }
 
         List<ApplicationStatusHistoryDTO> statusHistory = application.getStatusHistory();
