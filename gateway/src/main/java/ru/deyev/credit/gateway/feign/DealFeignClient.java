@@ -12,6 +12,9 @@ public interface DealFeignClient {
     @GetMapping("/admin/application/{applicationId}")
     ApplicationDTO getApplicationById(@PathVariable Long applicationId);
 
+    @PutMapping("/admin/application/{applicationId}/status")
+    void updateApplicationStatusById(@PathVariable Long applicationId, @RequestParam String statusName);
+
     @PutMapping("/calculate/{applicationId}")
     ResponseEntity<Void> calculateCredit(@PathVariable Long applicationId, @RequestBody ScoringDataDTO scoringData);
 
