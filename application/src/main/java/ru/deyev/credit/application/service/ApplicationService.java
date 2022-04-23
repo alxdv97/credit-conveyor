@@ -3,6 +3,7 @@ package ru.deyev.credit.application.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.deyev.credit.application.exception.PreScoringException;
 import ru.deyev.credit.application.feign.DealFeignClient;
 import ru.deyev.credit.application.model.LoanApplicationRequestDTO;
 import ru.deyev.credit.application.model.LoanOfferDTO;
@@ -20,7 +21,12 @@ public class ApplicationService {
     private final ApplicationValidator applicationValidator;
 
     public List<LoanOfferDTO> createLoanApplication(LoanApplicationRequestDTO request) {
-        applicationValidator.validate(request);
+        try {
+            applicationValidator.preScoring(request);
+        } catch (Exception e) {
+            log.warn("Pre-scoring failed by {}", e.getMessage());
+            throw new PreScoringException(e.getMessage());
+        }
         List<LoanOfferDTO> loanOffers = dealFeignClient.createApplication(request).getBody();
         log.info("Received offers: {}", loanOffers);
         return loanOffers;
