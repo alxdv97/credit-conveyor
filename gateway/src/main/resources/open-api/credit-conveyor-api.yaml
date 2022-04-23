@@ -252,7 +252,7 @@ components:
         email:
           type: string
           example: iivanov@email.ru
-          pattern: '[A-Za-z]{2,50}'
+          pattern: '[\w\.]{2,50}@[\w\.]{2,20}'
           description: Client's email.
         birthdate:
           type: string

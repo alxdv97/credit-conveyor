@@ -9,6 +9,7 @@ import ru.deyev.credit.deal.repository.ApplicationRepository;
 import ru.deyev.credit.deal.repository.CreditRepository;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -118,7 +119,8 @@ public class DocumentService {
 
 
         applicationRepository.save(application.setStatus(ApplicationStatus.DOCUMENT_SIGNED)
-                .setStatusHistory(statusHistory));
+                .setStatusHistory(statusHistory)
+                .setSignDate(LocalDate.now()));
 
         issueCredit(applicationId);
     }
