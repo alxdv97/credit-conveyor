@@ -1,6 +1,6 @@
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
@@ -29,10 +29,7 @@
             <column name="email" type="VARCHAR(255)"/>
             <column name="gender" type="VARCHAR(255)"/>
             <column name="birth_date" type="date"/>
-            <column name="passport_series" type="VARCHAR(50)"/>
-            <column name="passport_number" type="VARCHAR(50)"/>
-            <column name="passport_issue_date" type="DATE"/>
-            <column name="passport_issue_branch" type="TEXT"/>
+            <column name="passport_info" type="JSONB"/>
             <column name="marital_status" type="VARCHAR(50)"/>
             <column name="dependent_amount" type="INT"/>
             <column name="employment_dto" type="JSONB"/>

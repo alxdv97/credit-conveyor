@@ -39,14 +39,7 @@ public class DealService {
     private final CreditRepository creditRepository;
 
     public List<LoanOfferDTO> createApplication(@RequestBody LoanApplicationRequestDTO request) {
-        Client newClient = new Client()
-                .setFirstName(request.getFirstName())
-                .setMiddleName(request.getMiddleName())
-                .setLastName(request.getLastName())
-                .setBirthDate(request.getBirthdate())
-                .setPassportSeries(request.getPassportSeries())
-                .setPassportNumber(request.getPassportNumber())
-                .setEmail(request.getEmail());
+        Client newClient = createClientByRequest(request);
 
         Client savedClient = clientRepository.save(newClient);
 
@@ -74,6 +67,7 @@ public class DealService {
         return loanOffers;
     }
 
+
     public void calculateCredit(Long applicationId, ScoringDataDTO scoringData) {
         Application application = applicationRepository.findById(applicationId).orElseThrow(EntityNotFoundException::new);
         Client client = application.getClient();
@@ -85,8 +79,8 @@ public class DealService {
                 .middleName(client.getMiddleName())
                 .lastName(client.getLastName())
                 .birthdate(client.getBirthDate())
-                .passportSeries(client.getPassportSeries())
-                .passportNumber(client.getPassportNumber())
+                .passportSeries(client.getPassportInfo().getSeries())
+                .passportNumber(client.getPassportInfo().getNumber())
                 .isInsuranceEnabled(appliedOffer.getIsInsuranceEnabled())
                 .isSalaryClient(appliedOffer.getIsSalaryClient());
 
@@ -116,48 +110,42 @@ public class DealService {
                 .setCreditStatus(CALCULATED));
         log.info("calculateCredit(), saved credit={}", credit);
 
-        List<ApplicationStatusHistoryDTO> statusHistory = application.getStatusHistory();
-        statusHistory.add(
-                new ApplicationStatusHistoryDTO()
-                        .status(CC_APPROVED)
-                        .time(LocalDateTime.now())
-                        .changeType(AUTOMATIC));
+        PassportInfo fullPasswordInfo = new PassportInfo()
+                .series(client.getPassportInfo().getSeries())
+                .number(client.getPassportInfo().getNumber())
+                .issueDate(scoringData.getPassportIssueDate())
+                .issueBranch(scoringData.getPassportIssueBranch());
 
         clientRepository.save(client
                 .setGender(scoringData.getGender().name())
-                .setPassportIssueDate(scoringData.getPassportIssueDate())
-                .setPassportIssueBranch(scoringData.getPassportIssueBranch())
+                .setPassportInfo(fullPasswordInfo)
                 .setMaritalStatus(scoringData.getMaritalStatus().name())
                 .setDependentAmount(scoringData.getDependentAmount())
                 .setEmploymentDTO(scoringData.getEmployment())
                 .setAccount(scoringData.getAccount())
                 .setCredit(credit));
 
+        List<ApplicationStatusHistoryDTO> updatedStatusHistory = updateStatusHistory(application.getStatusHistory(), CC_APPROVED, AUTOMATIC);
+
         applicationRepository.save(application
                 .setStatus(CC_APPROVED)
-                .setStatusHistory(statusHistory)
+                .setStatusHistory(updatedStatusHistory)
                 .setCredit(credit));
         log.info("calculateCredit(), updated application={}", application);
 
-        documentService.createDocuments(applicationId);
+        documentService.createDocumentsRequest(applicationId);
     }
 
     public void applyOffer(LoanOfferDTO loanOfferDTO) {
         Application application = applicationRepository.getById(loanOfferDTO.getApplicationId());
-        List<ApplicationStatusHistoryDTO> statusHistory = application.getStatusHistory();
-
-        statusHistory.add(
-                new ApplicationStatusHistoryDTO()
-                        .status(APPROVED)
-                        .time(LocalDateTime.now())
-                        .changeType(MANUAL));
+        List<ApplicationStatusHistoryDTO> updatedStatusHistory = updateStatusHistory(application.getStatusHistory(), APPROVED, MANUAL);
 
         Application updatedApplication = applicationRepository.save(
                 application
                         .setStatus(APPROVED)
                         .setAppliedOffer(loanOfferDTO)
-                        .setStatusHistory(statusHistory)
-        );
+                        .setStatusHistory(updatedStatusHistory));
+
         EmailMessage message = new EmailMessage()
                 .address(updatedApplication.getClient().getEmail())
                 .applicationId(updatedApplication.getId())
@@ -167,5 +155,27 @@ public class DealService {
         log.info("applyOffer - message sent to dossier");
 
         log.info("applyOffer - end, updatedApplication={}", updatedApplication);
+    }
+
+    private Client createClientByRequest(LoanApplicationRequestDTO request) {
+        return new Client()
+                .setFirstName(request.getFirstName())
+                .setMiddleName(request.getMiddleName())
+                .setLastName(request.getLastName())
+                .setBirthDate(request.getBirthdate())
+                .setPassportInfo(new PassportInfo()
+                        .series(request.getPassportSeries())
+                        .number(request.getPassportNumber()))
+                .setEmail(request.getEmail());
+    }
+
+    private List<ApplicationStatusHistoryDTO> updateStatusHistory(List<ApplicationStatusHistoryDTO> previous,
+                                                                  ApplicationStatus newStatus,
+                                                                  ApplicationStatusHistoryDTO.ChangeTypeEnum changeType) {
+        previous.add(new ApplicationStatusHistoryDTO()
+                .status(newStatus)
+                .time(LocalDateTime.now())
+                .changeType(changeType));
+        return previous;
     }
 }

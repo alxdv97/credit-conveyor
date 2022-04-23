@@ -503,3 +503,28 @@ components:
           format: int64
           example: 1
           description: Application Id.
+
+    PassportInfo:
+      title: Passport Information
+      type: object
+      description: Client's passport information.
+      properties:
+        series:
+          type: string
+          pattern: '^([0-9]{4})$'
+          example: 1234
+          description: Passport series.
+        number:
+          type: string
+          pattern: '^([0-9]{6})$'
+          example: 123456
+          description: Password number.
+        issueDate:
+          type: string
+          format: date
+          example: 2016-11-27
+          description: Password issue date.
+        issueBranch:
+          type: string
+          example: 123-456
+          description: Passport issue branch.

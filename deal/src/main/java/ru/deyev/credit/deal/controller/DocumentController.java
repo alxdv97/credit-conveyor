@@ -11,11 +11,6 @@ public class DocumentController {
 
     private final DocumentService documentService;
 
-    @PostMapping("{applicationId}")
-    public void createDocuments(@PathVariable Long applicationId) {
-        documentService.createDocuments(applicationId);
-    }
-
     @PostMapping("{applicationId}/send")
     public void sendDocuments(@PathVariable Long applicationId) {
         documentService.sendDocuments(applicationId);
