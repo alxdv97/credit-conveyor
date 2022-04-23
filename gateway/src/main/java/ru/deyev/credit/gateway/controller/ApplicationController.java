@@ -8,6 +8,7 @@ import ru.deyev.credit.gateway.model.FinishRegistrationRequestDTO;
 import ru.deyev.credit.gateway.model.LoanApplicationRequestDTO;
 import ru.deyev.credit.gateway.model.LoanOfferDTO;
 import ru.deyev.credit.gateway.service.ApplicationService;
+import ru.deyev.credit.gateway.service.DealService;
 
 import java.util.List;
 
@@ -16,6 +17,8 @@ import java.util.List;
 public class ApplicationController implements ApplicationApi {
 
     private final ApplicationService applicationService;
+
+    private final DealService dealService;
 
     @Override
     public ResponseEntity<Void> applyOffer(LoanOfferDTO loanOfferDTO) {
@@ -34,7 +37,8 @@ public class ApplicationController implements ApplicationApi {
     }
 
     @Override
-    public ResponseEntity<Void> finishRegistration(FinishRegistrationRequestDTO finishRegistrationRequestDTO) {
-        return ApplicationApi.super.finishRegistration(finishRegistrationRequestDTO);
+    public ResponseEntity<Void> finishRegistration(Long applicationId, FinishRegistrationRequestDTO finishRegistrationRequestDTO) {
+        dealService.finishRegistration(applicationId, finishRegistrationRequestDTO);
+        return ResponseEntity.ok().build();
     }
 }

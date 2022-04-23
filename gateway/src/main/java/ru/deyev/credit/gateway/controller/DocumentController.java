@@ -13,17 +13,20 @@ public class DocumentController implements DocumentApi {
     private final DocumentService documentService;
 
     @Override
-    public ResponseEntity<Void> createDocuments() {
-        return DocumentApi.super.createDocuments();
+    public ResponseEntity<Void> createDocuments(Long applicationId) {
+        documentService.createDocuments(applicationId);
+        return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> sendSesCode(Integer body) {
-        return DocumentApi.super.sendSesCode(body);
+    public ResponseEntity<Void> signDocuments(Long applicationId) {
+        documentService.signDocuments(applicationId);
+        return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> signDocuments() {
-        return DocumentApi.super.signDocuments();
+    public ResponseEntity<Void> sendSesCode(Long applicationId, Integer body) {
+        documentService.sendSesCode(applicationId, body);
+        return ResponseEntity.ok().build();
     }
 }

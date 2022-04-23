@@ -22,6 +22,7 @@ components:
         - term
         - firstName
         - lastName
+        - email
         - birthDate
         - passportSeries
         - passportNumber
@@ -52,6 +53,11 @@ components:
           example: Ivanonovich
           pattern: '[A-Za-z]{2,30}'
           description: Client's middle name (if present).
+        email:
+          type: string
+          example: iivanov@email.ru
+          pattern: '[A-Za-z]{2,50}'
+          description: Client's email.
         birthdate:
           type: string
           format: date

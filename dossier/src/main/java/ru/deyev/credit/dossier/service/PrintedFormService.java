@@ -98,7 +98,7 @@ public class PrintedFormService {
             String bookmark = pair.getKey();
             String bookmarkValue = pair.getValue();
 
-            tmpText = tmpText.replaceAll(bookmark, bookmarkValue);
+            tmpText = tmpText.replaceAll("\\{" + bookmark + "\\}", bookmarkValue);
         }
 
         populatedText = tmpText;
@@ -112,35 +112,35 @@ public class PrintedFormService {
         ClientDTO client = application.getClient();
         EmploymentDTO employment = client.getEmployment();
 
-        bookmarks.put("{creditId}", credit.getId().toString());
-        bookmarks.put("{applicationCreationDate}", application.getCreationDate().toString());
-        bookmarks.put("{clientFullName}", client.getLastName() +
+        bookmarks.put("creditId", credit.getId().toString());
+        bookmarks.put("applicationCreationDate", application.getCreationDate().toString());
+        bookmarks.put("clientFullName", client.getLastName() +
                 " " + client.getFirstName() +
                 " " + client.getMiddleName());
-        bookmarks.put("{clientPassport}", client.getPassportSeries() +
+        bookmarks.put("clientPassport", client.getPassportSeries() +
                 " " + client.getPassportNumber() +
                 " issued " + client.getPassportIssueDate().toString() +
                 " branch code " + client.getPassportIssueBranch());
-        bookmarks.put("{creditAmount}", credit.getAmount().toString());
-        bookmarks.put("{creditTerm}", credit.getTerm().toString());
-        bookmarks.put("{monthlyPayment}", credit.getMonthlyPayment().toString());
-        bookmarks.put("{rate}", credit.getRate().toString());
-        bookmarks.put("{psk}", credit.getPsk().toString());
-        bookmarks.put("{isInsuranceEnabled}", credit.getIsInsuranceEnabled().toString());
-        bookmarks.put("{isSalaryClient}", credit.getIsSalaryClient().toString());
-        bookmarks.put("{paymentSchedule}", Arrays.deepToString(credit.getPaymentSchedule().toArray()));
-        bookmarks.put("{applicationId}", application.getId().toString());
-        bookmarks.put("{clientBirthdate}", client.getBirthdate().toString());
-        bookmarks.put("{clientGender}", client.getGender());
-        bookmarks.put("{clientEmail}", client.getEmail());
-        bookmarks.put("{clientMartialStatus}", client.getMaritalStatus());
-        bookmarks.put("{clientDependentAmount}", client.getDependentAmount().toString());
-        bookmarks.put("{employmentStatus}", employment.getEmploymentStatus().name());
-        bookmarks.put("{employerINN}", employment.getEmployerINN());
-        bookmarks.put("{employmentSalary}", employment.getSalary().toString());
-        bookmarks.put("{employmentPosition}", employment.getPosition().name());
-        bookmarks.put("{employmentWorkExperienceTotal}", employment.getWorkExperienceTotal().toString());
-        bookmarks.put("{employmentWorkExperienceCurrent}", employment.getWorkExperienceCurrent().toString());
+        bookmarks.put("creditAmount", credit.getAmount().toString());
+        bookmarks.put("creditTerm", credit.getTerm().toString());
+        bookmarks.put("monthlyPayment", credit.getMonthlyPayment().toString());
+        bookmarks.put("rate", credit.getRate().toString());
+        bookmarks.put("psk", credit.getPsk().toString());
+        bookmarks.put("isInsuranceEnabled", credit.getIsInsuranceEnabled().toString());
+        bookmarks.put("isSalaryClient", credit.getIsSalaryClient().toString());
+        bookmarks.put("paymentSchedule", Arrays.deepToString(credit.getPaymentSchedule().toArray()));
+        bookmarks.put("applicationId", application.getId().toString());
+        bookmarks.put("clientBirthdate", client.getBirthdate().toString());
+        bookmarks.put("clientGender", client.getGender());
+        bookmarks.put("clientEmail", client.getEmail());
+        bookmarks.put("clientMartialStatus", client.getMaritalStatus());
+        bookmarks.put("clientDependentAmount", client.getDependentAmount().toString());
+        bookmarks.put("employmentStatus", employment.getEmploymentStatus().name());
+        bookmarks.put("employerINN", employment.getEmployerINN());
+        bookmarks.put("employmentSalary", employment.getSalary().toString());
+        bookmarks.put("employmentPosition", employment.getPosition().name());
+        bookmarks.put("employmentWorkExperienceTotal", employment.getWorkExperienceTotal().toString());
+        bookmarks.put("employmentWorkExperienceCurrent", employment.getWorkExperienceCurrent().toString());
 
     }
 }

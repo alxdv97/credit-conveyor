@@ -57,8 +57,10 @@ paths:
         '200':
           description: OK
 
-  /application/registration:
-    post:
+  /application/registration/{applicationId}:
+    parameters:
+      - $ref: '#/components/parameters/applicationId'
+    put:
       summary: Finish registration
       operationId: finishRegistration
       description: Send full client info to finish registration.
@@ -72,7 +74,9 @@ paths:
         '200':
           description: OK
 
-  /document:
+  /document/{applicationId}:
+    parameters:
+      - $ref: '#/components/parameters/applicationId'
     post:
       summary: Create documents
       operationId: createDocuments
@@ -81,7 +85,9 @@ paths:
         '200':
           description: OK
 
-  /document/sign:
+  /document/{applicationId}/sign:
+    parameters:
+      - $ref: '#/components/parameters/applicationId'
     post:
       summary: Sign documents
       operationId: signDocuments
@@ -90,7 +96,9 @@ paths:
         '200':
           description: OK
 
-  /document/sign/code:
+  /document/{applicationId}/sign/code:
+    parameters:
+      - $ref: '#/components/parameters/applicationId'
     post:
       summary: Send SES code
       operationId: sendSesCode
@@ -208,6 +216,7 @@ components:
         - term
         - firstName
         - lastName
+        - email
         - birthDate
         - passportSeries
         - passportNumber
@@ -238,6 +247,11 @@ components:
           example: Ivanonovich
           pattern: '[A-Za-z]{2,30}'
           description: Client's middle name (if present).
+        email:
+          type: string
+          example: iivanov@email.ru
+          pattern: '[A-Za-z]{2,50}'
+          description: Client's email.
         birthdate:
           type: string
           format: date
@@ -622,3 +636,95 @@ components:
           format: double
           example: 92000.00
           description: Remaining debt amount.
+
+    ScoringDataDTO:
+      title: Scoring Data
+      type: object
+      description: Full scoring data.
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 1000000
+          minimum: 10000
+          description: Requested loan amount.
+        term:
+          type: integer
+          example: 24
+          minimum: 6
+          description: Requested loan term (months).
+        firstName:
+          type: string
+          example: Ivan
+          pattern: '[A-Za-z\-]{2,30}'
+          description: Client's first name
+        lastName:
+          type: string
+          example: Ivanov
+          pattern: '[A-Za-z\-]{2,30}'
+          description: Client's last name
+        middleName:
+          type: string
+          example: Ivanonovich
+          pattern: '[A-Za-z]{2,30}'
+          description: Client's middle name (if present).
+        gender:
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+            - NON_BINARY
+          example: MALE
+          description: Client's gender.
+        birthdate:
+          type: string
+          format: date
+          example: 1996-11-27
+          description: Client's birthdate
+        passportSeries:
+          type: string
+          example: 1234
+          pattern: '[0-9]{4}'
+          description: Client's passport series
+        passportNumber:
+          type: string
+          example: 123456
+          pattern: '[0-9]{6}'
+          description: Client's passport series
+        passportIssueDate:
+          type: string
+          format: date
+          example: 2016-11-27
+          description: Client's passport issue date.
+        passportIssueBranch:
+          type: string
+          example: 123-456
+          description: Client's passport issue branch.
+        maritalStatus:
+          type: string
+          enum:
+            - MARRIED
+            - DIVORCED
+            - SINGLE
+            - WIDOW_WIDOWER
+          example: SINGLE
+          description: Client's marital status.
+        dependentAmount:
+          type: integer
+          example: 1
+          description: Client's dependents amount.
+        employment:
+          $ref: '#/components/schemas/EmploymentDTO'
+        account:
+          type: string
+          pattern: '[0-9]{20}'
+          example: 11223344556677889900
+          description: Client's master account.
+        isInsuranceEnabled:
+          type: boolean
+          example: true
+          description: Is insurance enabled?
+        isSalaryClient:
+          type: boolean
+          example: true
+          description: Is salary client?
