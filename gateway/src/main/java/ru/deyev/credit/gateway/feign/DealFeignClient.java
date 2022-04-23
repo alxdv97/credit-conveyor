@@ -18,9 +18,6 @@ public interface DealFeignClient {
     @PutMapping("/calculate/{applicationId}")
     ResponseEntity<Void> calculateCredit(@PathVariable Long applicationId, @RequestBody ScoringDataDTO scoringData);
 
-    @PostMapping("/document/{applicationId}")
-    ResponseEntity<Void> createDocuments(@PathVariable Long applicationId);
-
     @PostMapping("/document/{applicationId}/send")
     ResponseEntity<Void> sendDocuments(@PathVariable Long applicationId);
 

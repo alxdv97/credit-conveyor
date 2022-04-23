@@ -25,7 +25,7 @@ public class DocumentService {
     private ApplicationRepository applicationRepository;
     private CreditRepository creditRepository;
 
-    public void createDocuments(Long applicationId) {
+    public void createDocumentsRequest(Long applicationId) {
 
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("Application with id " + applicationId + " not found."));
@@ -128,7 +128,7 @@ public class DocumentService {
     private void issueCredit(Long applicationId) {
 //        imitate long credit issuing action
         try {
-            Thread.sleep(10000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

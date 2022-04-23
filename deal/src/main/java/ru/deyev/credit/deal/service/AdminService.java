@@ -43,10 +43,10 @@ public class AdminService {
                             .dependentAmount(client.getDependentAmount())
                             .maritalStatus(client.getMaritalStatus())
                             .employment(client.getEmploymentDTO())
-                            .passportNumber(client.getPassportNumber())
-                            .passportSeries(client.getPassportSeries())
-                            .passportIssueBranch(client.getPassportIssueBranch())
-                            .passportIssueDate(client.getPassportIssueDate()));
+                            .passportNumber(client.getPassportInfo().getNumber())
+                            .passportSeries(client.getPassportInfo().getSeries())
+                            .passportIssueBranch(client.getPassportInfo().getIssueBranch())
+                            .passportIssueDate(client.getPassportInfo().getIssueDate()));
         }
 
         if (credit != null) {

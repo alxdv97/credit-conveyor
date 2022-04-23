@@ -34,20 +34,8 @@
             <column name="payment_schedule" type="JSONB"/>
             <column name="application_id" type="BIGINT"/>
             <column name="client_id" type="BIGINT"/>
+            <column name="credit_status" type="VARCHAR(50)"/>
         </createTable>
-    </changeSet>
-
-    <!--  Add column credit_status -->
-    <changeSet id="v1.0.02_add_column_credit_status_to_credit_table" author="Alexey_Deyev">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <columnExists columnName="credit_status" tableName="credit"/>
-            </not>
-        </preConditions>
-
-        <addColumn tableName="credit">
-            <column name="credit_status" type="VARCHAR(50)" remarks="credit status enum"/>
-        </addColumn>
     </changeSet>
 
     <changeSet id="v1.0.02_add_credit_pk" author="Alexey_Deyev">
