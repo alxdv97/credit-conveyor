@@ -2,6 +2,7 @@ package ru.deyev.credit.gateway.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import ru.deyev.credit.gateway.api.ApplicationApi;
 import ru.deyev.credit.gateway.model.FinishRegistrationRequestDTO;
@@ -32,8 +33,9 @@ public class ApplicationController implements ApplicationApi {
     }
 
     @Override
-    public ResponseEntity<Void> denyLoanApplication() {
-        return ApplicationApi.super.denyLoanApplication();
+    public ResponseEntity<Void> denyLoanApplication(@PathVariable Long applicationId) {
+        applicationService.denyLoanApplication(applicationId);
+        return ResponseEntity.ok().build();
     }
 
     @Override

@@ -33,7 +33,9 @@ paths:
         '400':
           description: Bad Request
 
-  /application/deny:
+  /application/{applicationId}/deny:
+    parameters:
+      - $ref: '#/components/parameters/applicationId'
     post:
       summary: Deny application
       operationId: denyLoanApplication
