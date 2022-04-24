@@ -9,6 +9,7 @@ import ru.deyev.credit.deal.repository.ApplicationRepository;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -96,5 +97,12 @@ public class AdminService {
         applicationRepository.save(application
                 .setStatus(status)
                 .setStatusHistory(statusHistory));
+    }
+
+    public List<ApplicationDTO> getAllApplications() {
+        return applicationRepository.findAll()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 }

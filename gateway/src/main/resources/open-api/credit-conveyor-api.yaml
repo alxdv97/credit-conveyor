@@ -151,42 +151,6 @@ paths:
         '404':
           description: No applications present
 
-  /admin/application/{applicationId}/status:
-    parameters:
-      - $ref: '#/components/parameters/applicationId'
-    get:
-      summary: Get application status by id
-      operationId: getApplicationStatusById
-      description: Get application status by id.
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApplicationStatus'
-        '404':
-          description: Application not found
-
-  /admin/application/{applicationId}/status/history:
-    parameters:
-      - $ref: '#/components/parameters/applicationId'
-    get:
-      summary: Get application status by id
-      operationId: getApplicationStatusHistoryById
-      description: Get application status by id.
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ApplicationStatusHistoryDTO'
-        '404':
-          description: Application not found
-
 components:
 
   parameters:
