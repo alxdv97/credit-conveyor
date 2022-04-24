@@ -11,7 +11,7 @@ import ru.deyev.credit.deal.model.ScoringDataDTO;
 
 import java.util.List;
 
-@FeignClient(url = "http://localhost:8080/conveyor", name = "CONVEYOR-FEIGN-CLIENT")
+@FeignClient(url = "${custom.feign.url.credit-conveyor}", name = "CONVEYOR-FEIGN-CLIENT")
 public interface ConveyorFeignClient {
 
     @PostMapping("/offers")

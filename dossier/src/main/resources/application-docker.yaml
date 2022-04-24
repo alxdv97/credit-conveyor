@@ -1,0 +1,8 @@
+spring:
+  kafka:
+    consumer:
+      bootstrap-servers: kafka:9092
+custom:
+  feign:
+    url:
+      deal: 'http://deal:8080/deal'

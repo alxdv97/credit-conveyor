@@ -4,7 +4,7 @@ COPY pom.xml /build/
 COPY src /build/src/
 
 WORKDIR /build/
-RUN mvn clean install
+RUN mvn clean install -Dmaven.test.skip=true
 
 FROM openjdk:11
 
@@ -12,4 +12,4 @@ WORKDIR /app
 
 COPY --from=MAVEN_BUILD /build/target/deal-0.0.1-SNAPSHOT.jar /app/
 
-ENTRYPOINT ["java", "-jar", "deal-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=docker", "deal-0.0.1-SNAPSHOT.jar"]

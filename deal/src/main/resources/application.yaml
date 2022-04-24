@@ -20,8 +20,6 @@ spring:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-server:
-  port: 8082
 
 custom:
   message:
@@ -30,3 +28,6 @@ custom:
       create-documents: 'conveyor-create-documents'
       send-documents: 'conveyor-send-documents'
       send-ses: 'conveyor-send-ses'
+  feign:
+    url:
+      credit-conveyor: 'http://localhost:8080/conveyor'
