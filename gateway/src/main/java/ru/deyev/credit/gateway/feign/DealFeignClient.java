@@ -6,11 +6,16 @@ import org.springframework.web.bind.annotation.*;
 import ru.deyev.credit.gateway.model.ApplicationDTO;
 import ru.deyev.credit.gateway.model.ScoringDataDTO;
 
+import java.util.List;
+
 @FeignClient(url = "${custom.feign.url.deal}", name = "DEAL-FEIGN-CLIENT")
 public interface DealFeignClient {
 
     @GetMapping("/admin/application/{applicationId}")
     ApplicationDTO getApplicationById(@PathVariable Long applicationId);
+
+    @GetMapping("/admin/application/all")
+    List<ApplicationDTO> getAllApplications();
 
     @PutMapping("/admin/application/{applicationId}/status")
     void updateApplicationStatusById(@PathVariable Long applicationId, @RequestParam String statusName);

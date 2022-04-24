@@ -113,6 +113,7 @@ public class PrintedFormService {
         EmploymentDTO employment = client.getEmployment();
 
         bookmarks.put("creditId", credit.getId().toString());
+        bookmarks.put("creditDate", application.getCreationDate().toString());
         bookmarks.put("applicationCreationDate", application.getCreationDate().toString());
         bookmarks.put("clientFullName", client.getLastName() +
                 " " + client.getFirstName() +

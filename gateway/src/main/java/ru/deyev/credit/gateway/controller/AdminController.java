@@ -5,8 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.deyev.credit.gateway.api.AdminApi;
 import ru.deyev.credit.gateway.model.ApplicationDTO;
-import ru.deyev.credit.gateway.model.ApplicationStatus;
-import ru.deyev.credit.gateway.model.ApplicationStatusHistoryDTO;
 import ru.deyev.credit.gateway.service.AdminService;
 
 import java.util.List;
@@ -19,21 +17,11 @@ public class AdminController implements AdminApi {
 
     @Override
     public ResponseEntity<List<ApplicationDTO>> getAllApplications() {
-        return AdminApi.super.getAllApplications();
+        return ResponseEntity.ok(adminService.getAllApplications());
     }
 
     @Override
     public ResponseEntity<ApplicationDTO> getApplicationById(Long applicationId) {
         return ResponseEntity.ok(adminService.getApplicationById(applicationId));
-    }
-
-    @Override
-    public ResponseEntity<ApplicationStatus> getApplicationStatusById(Long applicationId) {
-        return AdminApi.super.getApplicationStatusById(applicationId);
-    }
-
-    @Override
-    public ResponseEntity<List<ApplicationStatusHistoryDTO>> getApplicationStatusHistoryById(Long applicationId) {
-        return AdminApi.super.getApplicationStatusHistoryById(applicationId);
     }
 }

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.deyev.credit.gateway.feign.DealFeignClient;
 import ru.deyev.credit.gateway.model.ApplicationDTO;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class AdminService {
@@ -13,5 +15,9 @@ public class AdminService {
 
     public ApplicationDTO getApplicationById(Long applicationId) {
         return dealFeignClient.getApplicationById(applicationId);
+    }
+
+    public List<ApplicationDTO> getAllApplications() {
+        return dealFeignClient.getAllApplications();
     }
 }
