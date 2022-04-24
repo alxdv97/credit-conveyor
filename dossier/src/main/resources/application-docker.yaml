@@ -2,7 +2,6 @@ spring:
   kafka:
     consumer:
       bootstrap-servers: kafka:9092
-      topic
 custom:
   feign:
     url:
