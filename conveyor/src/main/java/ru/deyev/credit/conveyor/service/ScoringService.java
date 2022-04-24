@@ -20,7 +20,10 @@ import java.util.List;
 @Service
 public class ScoringService {
 
-    private static String FUNDING_RATE = "15.00";
+    private static final String FUNDING_RATE = "15.00";
+
+    //    using for calculating, this value updates during scoring
+    private static BigDecimal CURRENT_RATE = new BigDecimal(FUNDING_RATE);
 
     private static final String INSURANCE_DISCOUNT = "4.00";
 
@@ -67,7 +70,7 @@ public class ScoringService {
     }
 
     public BigDecimal calculateRate(Boolean isInsuranceEnabled, Boolean isSalaryClient) {
-        BigDecimal rate = new BigDecimal(FUNDING_RATE);
+        BigDecimal rate = new BigDecimal(CURRENT_RATE.toString());
 
         if (isInsuranceEnabled) {
             rate = rate.subtract(new BigDecimal(INSURANCE_DISCOUNT));
@@ -230,24 +233,26 @@ public class ScoringService {
 
         EmploymentDTO employment = scoringData.getEmployment();
 
+        BigDecimal currentRate = new BigDecimal(FUNDING_RATE);
+
         if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.UNEMPLOYED) {
             scoringRefuseCauses.add("Refuse cause: Client unemployed.");
         } else if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.SELF_EMPLOYED) {
             log.info("Funding rate increases by 1 percent point because employment status = SELF_EMPLOYED");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.ONE).toString();
+            currentRate = currentRate.add(BigDecimal.ONE);
         } else if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.BUSINESS_OWNER) {
             log.info("Funding rate increases by 3 percent point because employment status = BUSINESS_OWNER");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.valueOf(3)).toString();
+            currentRate = currentRate.add(BigDecimal.valueOf(3));
         }
 
         if (employment.getPosition() == EmploymentDTO.PositionEnum.MID_MANAGER) {
             log.info("Funding rate decreases by 2 percent point because employment position = MID_MANAGER");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(2)).toString();
+            currentRate = currentRate.subtract(BigDecimal.valueOf(2));
         }
 
         if (employment.getPosition() == EmploymentDTO.PositionEnum.TOP_MANAGER) {
             log.info("Funding rate decreases by 4 percent point because employment position = TOP_MANAGER");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(4)).toString();
+            currentRate = currentRate.subtract(BigDecimal.valueOf(4));
         }
 
         if (scoringData.getAmount()
@@ -257,15 +262,15 @@ public class ScoringService {
 
         if (scoringData.getDependentAmount() > 1) {
             log.info("Funding rate increases by 1 percent point because dependent amount > 1");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.ONE).toString();
+            currentRate = currentRate.add(BigDecimal.ONE);
         }
 
         if (scoringData.getMaritalStatus() == ScoringDataDTO.MaritalStatusEnum.MARRIED) {
             log.info("Funding rate decreases by 3 percent point because marital status = MARRIED");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(3)).toString();
+            currentRate = currentRate.subtract(BigDecimal.valueOf(3));
         } else if (scoringData.getMaritalStatus() == ScoringDataDTO.MaritalStatusEnum.DIVORCED) {
             log.info("Funding rate increases by 1 percent point because marital status = DIVORCED");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.ONE).toString();
+            currentRate = currentRate.add(BigDecimal.ONE);
         }
 
         long clientAge = ChronoUnit.YEARS.between(scoringData.getBirthdate(), LocalDate.now());
@@ -277,21 +282,21 @@ public class ScoringService {
 
         if (scoringData.getTerm() < 12) {
             log.info("Funding rate increases by 5 percent point because loan term < 12 months");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.valueOf(5)).toString();
+            currentRate = currentRate.add(BigDecimal.valueOf(5));
         } else if (scoringData.getTerm() >= 120) {
             log.info("Funding rate decreases by 2 percent point because loan term >= 120 months");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(2)).toString();
+            currentRate = currentRate.subtract(BigDecimal.valueOf(2));
         }
 
         if (scoringData.getGender() == ScoringDataDTO.GenderEnum.NON_BINARY) {
             log.info("Funding rate increases by 3 percent point because gender = NON_BINARY");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).add(BigDecimal.valueOf(3)).toString();
+            currentRate = currentRate.add(BigDecimal.valueOf(3));
         } else if (scoringData.getGender() == ScoringDataDTO.GenderEnum.FEMALE && (clientAge > 35 && clientAge < 60)) {
             log.info("Funding rate decreases by 3 percent point because gender = FEMALE and age between 35 and 60");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(3)).toString();
+            currentRate = currentRate.subtract(BigDecimal.valueOf(3));
         } else if (scoringData.getGender() == ScoringDataDTO.GenderEnum.FEMALE && (clientAge > 30 && clientAge < 55)) {
             log.info("Funding rate decreases by 3 percent point because gender = MALE and age between 30 and 55");
-            FUNDING_RATE = new BigDecimal(FUNDING_RATE).subtract(BigDecimal.valueOf(3)).toString();
+            currentRate = currentRate.subtract(BigDecimal.valueOf(3));
         }
 
         if (employment.getWorkExperienceTotal() < 12) {
@@ -311,6 +316,8 @@ public class ScoringService {
         if (scoringRefuseCauses.size() > 0) {
             throw new ScoringException(Arrays.deepToString(scoringRefuseCauses.toArray()));
         }
+
+        CURRENT_RATE = currentRate;
 
     }
 }
