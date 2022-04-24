@@ -12,4 +12,4 @@ WORKDIR /app
 
 COPY --from=MAVEN_BUILD /build/target/conveyor-0.0.1-SNAPSHOT.jar /app/
 
-ENTRYPOINT ["java", "-jar", "conveyor-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=docker", "conveyor-0.0.1-SNAPSHOT.jar"]

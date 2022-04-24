@@ -1,6 +1,3 @@
-server:
-  port: 8083
-
 spring:
   mail:
     host: smtp.gmail.com
@@ -71,6 +68,6 @@ custom:
           employment position: {employmentPosition}
           work experience (total): {employmentWorkExperienceTotal}
           work experience (current): {employmentWorkExperienceCurrent}
-      
-      
-      
+  feign:
+    url:
+      deal: 'http://localhost:8082/deal'

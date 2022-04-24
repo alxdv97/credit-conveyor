@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.deyev.credit.gateway.model.ApplicationDTO;
 import ru.deyev.credit.gateway.model.ScoringDataDTO;
 
-@FeignClient(url = "http://localhost:8082/deal", name = "DEAL-FEIGN-CLIENT")
+@FeignClient(url = "${custom.feign.url.deal}", name = "DEAL-FEIGN-CLIENT")
 public interface DealFeignClient {
 
     @GetMapping("/admin/application/{applicationId}")

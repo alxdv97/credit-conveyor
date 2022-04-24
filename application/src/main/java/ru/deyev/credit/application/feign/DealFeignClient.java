@@ -10,7 +10,7 @@ import ru.deyev.credit.application.model.LoanOfferDTO;
 
 import java.util.List;
 
-@FeignClient(url = "http://localhost:8082/deal", name = "DEAL-FEIGN-CLIENT")
+@FeignClient(url = "${custom.feign.url.deal}", name = "DEAL-FEIGN-CLIENT")
 public interface DealFeignClient {
 
     @PostMapping("/application")
