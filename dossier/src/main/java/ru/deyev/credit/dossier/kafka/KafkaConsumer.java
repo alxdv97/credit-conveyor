@@ -88,4 +88,30 @@ public class KafkaConsumer {
         emailSender.sendMessage(emailMessage.getAddress(), emailMessage.getSubject(), emailMessage.getText());
     }
 
+    @KafkaListener(topics = "conveyor-credit-issued", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeCreditIssuedMessage(String message) {
+        log.info("Consume credit issued message from kafka: {}", message);
+
+        MessageFromKafka messageFromKafka = messageService.parseMessageFromJSON(message);
+        log.info("MessageFromKafka = {}", messageFromKafka);
+
+        EmailMessage emailMessage = messageService.kafkaMessageToEmailMessage(messageFromKafka);
+        log.info("EmailMessage = {}", emailMessage);
+
+        emailSender.sendMessage(emailMessage.getAddress(), emailMessage.getSubject(), emailMessage.getText());
+    }
+
+    @KafkaListener(topics = "conveyor-application-denied", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeApplicationDeniedMessage(String message) {
+        log.info("Consume application denied message from kafka: {}", message);
+
+        MessageFromKafka messageFromKafka = messageService.parseMessageFromJSON(message);
+        log.info("MessageFromKafka = {}", messageFromKafka);
+
+        EmailMessage emailMessage = messageService.kafkaMessageToEmailMessage(messageFromKafka);
+        log.info("EmailMessage = {}", emailMessage);
+
+        emailSender.sendMessage(emailMessage.getAddress(), emailMessage.getSubject(), emailMessage.getText());
+    }
+
 }

@@ -22,6 +22,11 @@ public class DossierService {
     private String SEND_DOCUMENT_TOPIC;
     @Value("${custom.message.topic.send-ses}")
     private String SEND_SES_TOPIC;
+    @Value("${custom.message.topic.credit-issued}")
+    private String CREDIT_ISSUED_TOPIC;
+    @Value("${custom.message.topic.application-denied}")
+    private String APPLICATION_DENIED_TOPIC;
+
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
@@ -59,7 +64,14 @@ public class DossierService {
             }
             case SEND_SES: {
                 topic = SEND_SES_TOPIC;
-                ;
+                break;
+            }
+            case CREDIT_ISSUED: {
+                topic = CREDIT_ISSUED_TOPIC;
+                break;
+            }
+            case APPLICATION_DENIED: {
+                topic = APPLICATION_DENIED_TOPIC;
                 break;
             }
         }

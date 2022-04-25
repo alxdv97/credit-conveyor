@@ -33,6 +33,14 @@ public class MessageService {
     private String SEND_SES_SUBJECT;
     @Value("${custom.message.send-ses.text}")
     private String SEND_SES_TEXT;
+    @Value("${custom.message.credit-issued.subject}")
+    private String CREDIT_ISSUED_SUBJECT;
+    @Value("${custom.message.credit-issued.text}")
+    private String CREDIT_ISSUED_TEXT;
+    @Value("${custom.message.application-denied.subject}")
+    private String APPLICATION_DENIED_SUBJECT;
+    @Value("${custom.message.application-denied.text}")
+    private String APPLICATION_DENIED_TEXT;
 
     private final ObjectMapper objectMapper;
 
@@ -88,6 +96,20 @@ public class MessageService {
                         .replaceAll("\\{applicationId\\}", application.getId().toString());
                 subject = SEND_SES_SUBJECT;
                 text = sendSesCodeTextEvaluated;
+                break;
+            }
+            case CREDIT_ISSUED: {
+                ApplicationDTO application = dealFeignClient.getApplicationById(fromKafka.getApplicationId());
+                String sendDocumentTextEvaluated = CREDIT_ISSUED_TEXT.replaceAll("\\{applicationId\\}", application.getId().toString());
+                subject = CREDIT_ISSUED_SUBJECT;
+                text = sendDocumentTextEvaluated;
+                break;
+            }
+            case APPLICATION_DENIED: {
+                ApplicationDTO application = dealFeignClient.getApplicationById(fromKafka.getApplicationId());
+                String sendDocumentTextEvaluated = APPLICATION_DENIED_TEXT.replaceAll("\\{applicationId\\}", application.getId().toString());
+                subject = APPLICATION_DENIED_SUBJECT;
+                text = sendDocumentTextEvaluated;
                 break;
             }
             default: {

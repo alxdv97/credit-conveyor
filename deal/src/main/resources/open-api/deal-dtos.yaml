@@ -498,6 +498,8 @@ components:
             - CREATE_DOCUMENT
             - SEND_DOCUMENT
             - SEND_SES
+            - CREDIT_ISSUED
+            - APPLICATION_DENIED
         applicationId:
           type: integer
           format: int64

@@ -151,6 +151,11 @@ public class DocumentService {
                 .setStatusHistory(statusHistory));
         creditRepository.save(credit.setCreditStatus(CreditStatus.ISSUED));
 
+        dossierService.sendMessage(new EmailMessage()
+                .theme(EmailMessage.ThemeEnum.CREDIT_ISSUED)
+                .applicationId(applicationId)
+                .address(application.getClient().getEmail()));
+
         log.info("\n----------------------------------------" +
                 "\n-------------CONGRATULATION!------------" +
                 "\n--------CREDIT FOR APPLICATION {}-------" +
