@@ -28,6 +28,8 @@ custom:
       create-documents: 'conveyor-create-documents'
       send-documents: 'conveyor-send-documents'
       send-ses: 'conveyor-send-ses'
+      credit-issued: 'conveyor-credit-issued'
+      application-denied: 'conveyor-application-denied'
   feign:
     url:
       credit-conveyor: 'http://localhost:8080/conveyor'

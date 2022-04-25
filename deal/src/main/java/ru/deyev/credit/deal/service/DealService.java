@@ -87,11 +87,34 @@ public class DealService {
         log.info("calculateCredit(), full scoringData={}", scoringData);
         CreditDTO creditDTO = null;
 
+        PassportInfo fullPassportInfo = new PassportInfo()
+                .series(client.getPassportInfo().getSeries())
+                .number(client.getPassportInfo().getNumber())
+                .issueDate(scoringData.getPassportIssueDate())
+                .issueBranch(scoringData.getPassportIssueBranch());
+
+
         try {
             creditDTO = conveyorFeignClient.calculateCredit(scoringData).getBody();
         } catch (Exception e) {
             log.warn("Credit conveyor denied application by these reasons: {}", e.getMessage());
             applicationRepository.save(application.setStatus(CC_DENIED));
+
+            clientRepository.save(client
+                    .setGender(scoringData.getGender().name())
+                    .setPassportInfo(fullPassportInfo)
+                    .setMaritalStatus(scoringData.getMaritalStatus().name())
+                    .setDependentAmount(scoringData.getDependentAmount())
+                    .setEmploymentDTO(scoringData.getEmployment())
+                    .setAccount(scoringData.getAccount()));
+
+            dossierService.sendMessage(new EmailMessage()
+                    .theme(EmailMessage.ThemeEnum.APPLICATION_DENIED)
+                    .applicationId(applicationId)
+                    .address(application.getClient().getEmail()));
+
+//           method ends normally, clients will know about deny by email
+            return;
         }
         log.info("calculateCredit(), credit after calculating creditDTO={}", creditDTO);
 
@@ -110,19 +133,7 @@ public class DealService {
                 .setCreditStatus(CALCULATED));
         log.info("calculateCredit(), saved credit={}", credit);
 
-        PassportInfo fullPasswordInfo = new PassportInfo()
-                .series(client.getPassportInfo().getSeries())
-                .number(client.getPassportInfo().getNumber())
-                .issueDate(scoringData.getPassportIssueDate())
-                .issueBranch(scoringData.getPassportIssueBranch());
-
         clientRepository.save(client
-                .setGender(scoringData.getGender().name())
-                .setPassportInfo(fullPasswordInfo)
-                .setMaritalStatus(scoringData.getMaritalStatus().name())
-                .setDependentAmount(scoringData.getDependentAmount())
-                .setEmploymentDTO(scoringData.getEmployment())
-                .setAccount(scoringData.getAccount())
                 .setCredit(credit));
 
         List<ApplicationStatusHistoryDTO> updatedStatusHistory = updateStatusHistory(application.getStatusHistory(), CC_APPROVED, AUTOMATIC);

@@ -2,11 +2,8 @@ package ru.deyev.credit.application.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.deyev.credit.application.exception.PreScoringException;
 import ru.deyev.credit.application.model.LoanApplicationRequestDTO;
 import ru.deyev.credit.application.model.LoanOfferDTO;
 import ru.deyev.credit.application.service.ApplicationService;
@@ -22,7 +19,11 @@ public class ApplicationController {
 
     @PostMapping
     public ResponseEntity<List<LoanOfferDTO>> createApplication(@RequestBody LoanApplicationRequestDTO request) {
-        return ResponseEntity.ok(applicationService.createLoanApplication(request));
+        try {
+            return ResponseEntity.ok(applicationService.createLoanApplication(request));
+        } catch (PreScoringException e) {
+            throw new IllegalArgumentException("Pre-scoring failed because: " + e.getMessage());
+        }
     }
 
     @PutMapping("/offer")

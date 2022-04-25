@@ -18,6 +18,8 @@ public class AdminService {
 
     private ApplicationRepository applicationRepository;
 
+    private DossierService dossierService;
+
     public ApplicationDTO getApplicationById(Long applicationId) {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application with id = " + applicationId + " not found"));
@@ -93,6 +95,14 @@ public class AdminService {
                 .status(status)
                 .time(LocalDateTime.now())
                 .changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC));
+
+        if (status == ApplicationStatus.CLIENT_DENIED) {
+            log.info("Application {} denied", applicationId);
+            dossierService.sendMessage(new EmailMessage()
+                    .theme(EmailMessage.ThemeEnum.APPLICATION_DENIED)
+                    .applicationId(applicationId)
+                    .address(application.getClient().getEmail()));
+        }
 
         applicationRepository.save(application
                 .setStatus(status)
