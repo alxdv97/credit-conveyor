@@ -134,6 +134,12 @@ public class DealService {
         log.info("calculateCredit(), saved credit={}", credit);
 
         clientRepository.save(client
+                .setGender(scoringData.getGender().name())
+                .setPassportInfo(fullPassportInfo)
+                .setMaritalStatus(scoringData.getMaritalStatus().name())
+                .setDependentAmount(scoringData.getDependentAmount())
+                .setEmploymentDTO(scoringData.getEmployment())
+                .setAccount(scoringData.getAccount())
                 .setCredit(credit));
 
         List<ApplicationStatusHistoryDTO> updatedStatusHistory = updateStatusHistory(application.getStatusHistory(), CC_APPROVED, AUTOMATIC);
