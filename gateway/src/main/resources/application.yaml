@@ -1,3 +1,6 @@
+spring:
+  main:
+    allow-circular-references: true
 custom:
   feign:
     url:
@@ -6,3 +9,8 @@ custom:
   swagger:
     service:
       url: 'http://localhost:8880'
+logging:
+  level:
+    org:
+      zalando:
+        logbook: TRACE
