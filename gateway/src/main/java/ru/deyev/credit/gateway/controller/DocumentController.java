@@ -29,4 +29,6 @@ public class DocumentController implements DocumentApi {
         documentService.sendSesCode(applicationId, body);
         return ResponseEntity.ok().build();
     }
+
+
 }

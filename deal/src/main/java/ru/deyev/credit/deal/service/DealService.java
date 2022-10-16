@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.deyev.credit.deal.feign.ConveyorFeignClient;
+import ru.deyev.credit.deal.metric.MeasureService;
 import ru.deyev.credit.deal.model.*;
 import ru.deyev.credit.deal.repository.ApplicationRepository;
 import ru.deyev.credit.deal.repository.ClientRepository;
@@ -38,6 +39,8 @@ public class DealService {
 
     private final CreditRepository creditRepository;
 
+    private final MeasureService measureService;
+
     public List<LoanOfferDTO> createApplication(@RequestBody LoanApplicationRequestDTO request) {
         Client newClient = createClientByRequest(request);
 
@@ -58,6 +61,8 @@ public class DealService {
         clientRepository.save(savedClient.setApplication(savedApplication));
 
         List<LoanOfferDTO> loanOffers = conveyorFeignClient.generateOffers(request).getBody();
+
+        measureService.incrementStatusCounter(savedApplication.getStatus());
 
         assert loanOffers != null;
         loanOffers.forEach(loanOfferDTO -> loanOfferDTO.setApplicationId(savedApplication.getId()));
@@ -99,6 +104,8 @@ public class DealService {
         } catch (Exception e) {
             log.warn("Credit conveyor denied application by these reasons: {}", e.getMessage());
             applicationRepository.save(application.setStatus(CC_DENIED));
+
+            measureService.incrementStatusCounter(CC_DENIED);
 
             clientRepository.save(client
                     .setGender(scoringData.getGender().name())
@@ -150,6 +157,8 @@ public class DealService {
                 .setCredit(credit));
         log.info("calculateCredit(), updated application={}", application);
 
+        measureService.incrementStatusCounter(CC_APPROVED);
+
         documentService.createDocumentsRequest(applicationId);
     }
 
@@ -162,6 +171,8 @@ public class DealService {
                         .setStatus(APPROVED)
                         .setAppliedOffer(loanOfferDTO)
                         .setStatusHistory(updatedStatusHistory));
+
+        measureService.incrementStatusCounter(application.getStatus());
 
         EmailMessage message = new EmailMessage()
                 .address(updatedApplication.getClient().getEmail())
