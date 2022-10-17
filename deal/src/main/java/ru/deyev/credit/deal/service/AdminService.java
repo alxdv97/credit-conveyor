@@ -3,6 +3,7 @@ package ru.deyev.credit.deal.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.deyev.credit.deal.audit.AuditAction;
 import ru.deyev.credit.deal.model.*;
 import ru.deyev.credit.deal.repository.ApplicationRepository;
 
@@ -20,6 +21,7 @@ public class AdminService {
 
     private DossierService dossierService;
 
+    @AuditAction
     public ApplicationDTO getApplicationById(Long applicationId) {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application with id = " + applicationId + " not found"));
@@ -83,6 +85,7 @@ public class AdminService {
                 .creationDate(application.getCreationDate().atStartOfDay());
     }
 
+    @AuditAction
     public void updateApplicationStatusById(Long applicationId, ApplicationStatus status) {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("Application with id " + applicationId + " not found."));
@@ -109,6 +112,7 @@ public class AdminService {
                 .setStatusHistory(statusHistory));
     }
 
+    @AuditAction
     public List<ApplicationDTO> getAllApplications() {
         return applicationRepository.findAll()
                 .stream()
