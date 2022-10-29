@@ -92,3 +92,6 @@ services:
     command: redis-server --save 20 1 --loglevel warning
     volumes:
       - audit:/data
+volumes:
+  audit:
+    driver: local
