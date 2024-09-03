@@ -10,6 +10,8 @@ import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -55,4 +57,31 @@ public class Application {
     @Column
     @Type(type = "jsonb")
     private LoanOfferDTO appliedOffer;
+
+    public void updateApplicationStatus(ApplicationStatus newStatus,
+                                        ApplicationStatusHistoryDTO.ChangeTypeEnum changeType) {
+
+        List<ApplicationStatusHistoryDTO> updatedStatusHistory = updateStatusHistory(
+                this.getStatusHistory(),
+                newStatus,
+                changeType
+        );
+
+        this.setStatus(newStatus)
+                .setStatusHistory(updatedStatusHistory);
+    }
+
+    private List<ApplicationStatusHistoryDTO> updateStatusHistory(List<ApplicationStatusHistoryDTO> history,
+                                                                  ApplicationStatus newStatus,
+                                                                  ApplicationStatusHistoryDTO.ChangeTypeEnum changeType) {
+        if (history == null) {
+            history = new ArrayList<>();
+        }
+
+        history.add(new ApplicationStatusHistoryDTO()
+                .status(newStatus)
+                .time(LocalDateTime.now())
+                .changeType(changeType));
+        return history;
+    }
 }

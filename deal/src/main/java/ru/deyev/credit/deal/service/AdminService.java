@@ -1,9 +1,10 @@
 package ru.deyev.credit.deal.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.deyev.credit.deal.audit.AuditAction;
+import ru.deyev.credit.deal.metric.Monitored;
 import ru.deyev.credit.deal.model.*;
 import ru.deyev.credit.deal.repository.ApplicationRepository;
 
@@ -12,14 +13,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
-@AllArgsConstructor
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class AdminService {
-
-    private ApplicationRepository applicationRepository;
-
-    private DossierService dossierService;
+    private final ApplicationRepository applicationRepository;
+    private final DossierService dossierService;
 
     @AuditAction
     public ApplicationDTO getApplicationById(Long applicationId) {
@@ -76,11 +75,9 @@ public class AdminService {
             applicationDTO.sesCode(application.getSesCode().toString());
         }
 
-        List<ApplicationStatusHistoryDTO> statusHistory = application.getStatusHistory();
-
         return applicationDTO
                 .id(application.getId())
-                .statusHistory(statusHistory)
+                .statusHistory(application.getStatusHistory())
                 .status(application.getStatus())
                 .creationDate(application.getCreationDate().atStartOfDay());
     }
@@ -93,12 +90,6 @@ public class AdminService {
         log.info("Updating application {} status from {} to {}",
                 applicationId, application.getStatus(), status);
 
-        List<ApplicationStatusHistoryDTO> statusHistory = application.getStatusHistory();
-        statusHistory.add(new ApplicationStatusHistoryDTO()
-                .status(status)
-                .time(LocalDateTime.now())
-                .changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC));
-
         if (status == ApplicationStatus.CLIENT_DENIED) {
             log.info("Application {} denied", applicationId);
             dossierService.sendMessage(new EmailMessage()
@@ -107,9 +98,9 @@ public class AdminService {
                     .address(application.getClient().getEmail()));
         }
 
-        applicationRepository.save(application
-                .setStatus(status)
-                .setStatusHistory(statusHistory));
+        updateApplicationStatus(application, status, ApplicationStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC);
+
+        applicationRepository.save(application);
     }
 
     @AuditAction
@@ -118,5 +109,12 @@ public class AdminService {
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Monitored
+    public void updateApplicationStatus(Application application,
+                                        ApplicationStatus newStatus,
+                                        ApplicationStatusHistoryDTO.ChangeTypeEnum changeType) {
+        application.updateApplicationStatus(newStatus, changeType);
     }
 }

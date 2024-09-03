@@ -17,8 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class PrintedFormService {
 
