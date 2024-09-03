@@ -3,7 +3,7 @@ version: '3.8'
 services:
 #  Gateway
   gateway:
-    image: alxdv/credit-conveyor_gateway:1.0.9
+    image: alxdv/credit-conveyor_gateway:1.0.10
     container_name: gateway
     ports:
       - "8080:8080"
