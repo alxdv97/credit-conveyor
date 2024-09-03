@@ -20,11 +20,11 @@
 Во всех микросервисах используется данный стек технологий:
 
 ### Общее:
-- Стек: Java 11+ & Lombok (Kotlin 1.6+) + SpringBoot;
-- Тестирование: Junit4/5+Mockito. Целевой процент покрытия - 90%;
-- СУБД: Postgres + liquibase (spring.jpa.hibernate.ddl-auto: validate);
-- API & DTO генерировать через OpenAPI, документация API через swagger;
-- Маппинг сущностей: mapstruct;
+- Стек: Java 11 & Lombok (Kotlin 1.6) + SpringBoot v2.7;
+- Тестирование: Junit4/5, Mockito. Целевой процент покрытия - 80%;
+- СУБД: Postgres + liquibase (проперти spring.jpa.hibernate.ddl-auto: validate);
+- Для Java: API & DTO генерировать через OpenAPI maven generator, маппинг сущностей с использованием фреймворка mapstruct
+- Документация API через swagger;
 - Все REST-endpoints должны возвращать ResponseEntity<DTO>; Request/response логгирование от каждого МСа;
 - Синхронное взаимодействие: Feign + FeignErrorDecoder (для проброса ошибок между МСами);
 - Асинхронное взаимодействие: Kafka;
@@ -44,27 +44,27 @@
 #### API:
 `POST: /conveyor/offers` - расчёт возможных условий кредита. 
 
-- Request - `LoanApplicationRequestDTO`
-- Response - `List<LoanOfferDTO>`
+- Request - [LoanApplicationRequestDTO](#LoanApplicationRequestDTO)
+- Response - List<[LoanOfferDTO](#LoanOfferDTO)>
 
-По API приходит `LoanApplicationRequestDTO`.
+По API приходит [LoanApplicationRequestDTO](#LoanApplicationRequestDTO).
 
-На основании `LoanApplicationRequestDTO` происходит [прескоринг](#prescoring) создаётся 4 кредитных предложения `LoanOfferDTO` на основании всех возможных комбинаций булевских полей 
+На основании [LoanApplicationRequestDTO](#LoanApplicationRequestDTO) происходит [прескоринг](#prescoring), создаётся 4 кредитных предложения [LoanOfferDTO](#LoanOfferDTO) на основании всех возможных комбинаций булевских полей 
 isInsuranceEnabled и isSalaryClient (false-false, false-true, true-false, true-true). Логику формирования кредитных предложений можно придумать самому. 
 К примеру: в зависимости от страховых услуг увеличивается/уменьшается процентная ставка и сумма кредита, базовая ставка хардкодится в коде через property файл. 
 Например, цена страховки 100к (или прогрессивная, в зависимости от запрошенной суммы кредита), ее стоимость добавляется в тело кредита, но она уменьшает ставку на 3. 
 Цена зарплатного клиента 0, уменьшает ставку на 1.
 
-Ответ на API - список из 4х LoanOfferDTO от "худшего" к "лучшему" (чем меньше итоговая ставка, тем лучше).
+Ответ на API - список из 4х [LoanOfferDTO](#LoanOfferDTO) от "худшего" к "лучшему" (чем меньше итоговая ставка, тем лучше).
 
 `POST: /conveyor/calculation` - валидация присланных данных + [скоринг](#scoring) данных + полный расчет параметров кредита. 
-- Request - `ScoringDataDTO`
-- Response `CreditDTO`.
-По API приходит ScoringDataDTO.
-Происходит [скоринг](#scoring) данных, высчитывание ставки(`rate`), полной стоимости кредита(`psk`), размер ежемесячного платежа(`monthlyPayment`), график ежемесячных платежей (`List<PaymentScheduleElement>`). 
+- Request - [ScoringDataDTO](#ScoringDataDTO)
+- Response [CreditDTO](#CreditDTO).
+По API приходит [ScoringDataDTO](#ScoringDataDTO).
+Происходит [скоринг](#scoring) данных, высчитывание ставки(`rate`), полной стоимости кредита(`psk`), размер ежемесячного платежа(`monthlyPayment`), график ежемесячных платежей (List<[PaymentScheduleElement](#PaymentScheduleElement)>). 
 Логику расчета параметров кредита можно найти в интернете (пример), полученный результат сверять с имеющимися в интернете калькуляторами графиков платежей и ПСК.
 
-Ответ на API - `CreditDTO`, насыщенный всеми рассчитанными параметрами.
+Ответ на API - [CreditDTO](#CreditDTO), насыщенный всеми рассчитанными параметрами.
 
 ### MVP Level 2.
 
@@ -88,40 +88,40 @@ _Так же допускается связь o2o для отношения app
 #### Реализовать логику работы API:
 `POST: /deal/application`
 
-- Request - `LoanApplicationRequestDTO`
-- Response - `List<LoanOfferDTO>`
+- Request - [LoanApplicationRequestDTO](#LoanApplicationRequestDTO)
+- Response - List<[LoanOfferDTO](#LoanOfferDTO)>
 
-По API приходит `LoanApplicationRequestDTO`
-На основе `LoanApplicationRequestDTO` создаётся сущность `Client` и сохраняется в БД.
+По API приходит [LoanApplicationRequestDTO](#LoanApplicationRequestDTO)
+На основе [LoanApplicationRequestDTO](#LoanApplicationRequestDTO) создаётся сущность `Client` и сохраняется в БД.
 Создаётся `Application` со связью на только что созданный `Client` и сохраняется в БД.
 Отправляется POST запрос на /conveyor/offers МС conveyor через `FeignClient`. 
-Каждому элементу из списка `List<LoanOfferDTO>` присваивается id созданной заявки (Application)
+Каждому элементу из списка List<[LoanOfferDTO](#LoanOfferDTO)> присваивается id созданной заявки (Application)
 
-Ответ на API - список из 4х LoanOfferDTO от "худшего" к "лучшему".
+Ответ на API - список из 4-х [LoanOfferDTO](#LoanOfferDTO) от "худшего" к "лучшему".
 
 `PUT: /deal/offer`
 
-- Request `LoanOfferDTO`
+- Request [LoanOfferDTO](#LoanOfferDTO)
 - Response `void`
 
-По API приходит `LoanOfferDTO`.
-Достаётся из БД заявка(`Application`) по `applicationId` из `LoanOfferDTO`.
-В заявке обновляется статус, история статусов(`List<ApplicationStatusHistoryDTO>`), 
-принятое предложение `LoanOfferDTO` устанавливается в поле `appliedOffer`.
+По API приходит [LoanOfferDTO](#LoanOfferDTO).
+Достаётся из БД заявка(`Application`) по `applicationId` из [LoanOfferDTO](#LoanOfferDTO).
+В заявке обновляется статус, история статусов(List<[ApplicationStatusHistoryDTO](#ApplicationStatusHistoryDTO)>), 
+принятое предложение [LoanOfferDTO](#LoanOfferDTO) устанавливается в поле `appliedOffer`.
 
 Заявка сохраняется.
 
 `PUT: /deal/calculate/{applicationId}`
 
-- Request `FinishRegistrationRequestDTO`, param - `Long`
+- Request [FinishRegistrationRequestDTO](#FinishRegistrationRequestDTO), param - `Long`
 - Response `void`
 
-По API приходит объект `FinishRegistrationRequestDTO` и параметр `applicationId`.
+По API приходит объект [FinishRegistrationRequestDTO](#FinishRegistrationRequestDTO) и параметр `applicationId`.
 
 Достаётся из БД заявка(`Application`) по `applicationId`.
-`ScoringDataDTO` насыщается информацией из `FinishRegistrationRequestDTO` и `Client`, который хранится в `Application`.
-Отправляется POST запрос на `/conveyor/calculation` МС conveyor с телом `ScoringDataDTO` через `FeignClient`.
-На основе полученного из кредитного конвейера `CreditDTO` создаётся сущность `Credit` и сохраняется 
+[ScoringDataDTO](#ScoringDataDTO) насыщается информацией из [FinishRegistrationRequestDTO](#FinishRegistrationRequestDTO) и `Client`, который хранится в `Application`.
+Отправляется POST запрос на `/conveyor/calculation` МС conveyor с телом [ScoringDataDTO](#ScoringDataDTO) через `FeignClient`.
+На основе полученного из кредитного конвейера [CreditDTO](#CreditDTO) создаётся сущность `Credit` и сохраняется 
 в базу со статусом `CALCULATED`.
 
 В заявке обновляется статус, история статусов.
@@ -133,20 +133,20 @@ _Так же допускается связь o2o для отношения app
 
 #### Реализовать логику работы API МС-application:
 `POST: /application`
-- Request `LoanApplicationRequestDTO`
-- Response `List<LoanOfferDTO>`
+- Request [LoanApplicationRequestDTO](#LoanApplicationRequestDTO)
+- Response List<[LoanOfferDTO](#LoanOfferDTO)>
 
-По API приходит LoanApplicationRequestDTO.
+По API приходит [LoanApplicationRequestDTO](#LoanApplicationRequestDTO).
 
-На основе LoanApplicationRequestDTO происходит [прескоринг](#prescoring).
+На основе [LoanApplicationRequestDTO](#LoanApplicationRequestDTO) происходит [прескоринг](#prescoring).
 Отправляется POST-запрос на `/deal/application` в МС deal через `FeignClient`.
-Ответ на API - список из 4х `LoanOfferDTO` от "худшего" к "лучшему".
+Ответ на API - список из 4-х [LoanOfferDTO](#LoanOfferDTO) от "худшего" к "лучшему".
 
 `POST: /application/offer`
-- Request `LoanOfferDTO`
+- Request [LoanOfferDTO](#LoanOfferDTO)
 - Response `void`
 
-По API приходит `LoanOfferDTO`
+По API приходит [LoanOfferDTO](#LoanOfferDTO)
 
 Отправляется POST-запрос на `/deal/offer` в МС deal через `FeignClient`.
 
@@ -173,7 +173,7 @@ _Также иногда почтовые сервисы не хотят отп�
 
 Первая отправка письма на почту клиенту должна происходить в самом конце существующей API `PUT: /deal/offer`
 
-В запросе от МС-deal к МС-dossier используется ДТО `EmailMessage`
+В запросе от МС-deal к МС-dossier используется ДТО [EmailMessage](#EmailMessage)
 
 #### Реализовать взаимодействие через Kafka между МС-deal и МС-dossier
 
@@ -238,12 +238,10 @@ public class MonitoringTest {
     @PostConstruct
     private void initStatusCounters(){
         Arrays.stream(ApplicationStatus.values())
-                .forEach(status-> {
-                            Counter.builder(COUNTER_STATUS_NAME)
-                                    .description("Number of applications in each status")
-                                    .tag("status",status.name())
-                                    .register(meterRegistry);
-                        }
+                .forEach(status -> Counter.builder(COUNTER_STATUS_NAME)
+                        .description("Number of applications in each status")
+                        .tag("status", status.name())
+                        .register(meterRegistry)
                 );
     }
 }
@@ -280,9 +278,6 @@ public class MonitoringTest {
 6. Если проверка прошла, запрос идет дальше по МСам
 7. Если проверка не прошла, пользователю возвращается 403 ошибка
 
-Архитектура взаимодействия МС auth с МС gateway:
-
-
 ### MVP Level 9. Добавление аудита
 
 - Создать МС `audit`, в который будут отправляться события для аудита асинхронно, по kafka.
@@ -311,7 +306,7 @@ Enum[APPLICATION,DEAL,CONVEYOR,DOSSIER], message: String)`
 - Валидация присланных данных и расчет всех параметров кредита
 - Заявка обновляется со статусом DOCUMENT_SIGNED
 - Выдача кредита (статус заявки CREDIT_ISSUED)
-- Так же для выполнение норм безопасности требуется выполнять событие аудита для методов взятия заявки по id и взятия всех заявок.
+- Так же для выполнения норм безопасности требуется выполнять событие аудита для методов взятия заявки по id и взятия всех заявок.
 
 ### MVP Level 10.Тестирование с помощью testcontainers
 Необходимо написать несколько интеграционных тестов для МС Deal. БД развернуть с помощью `testcontainers`
@@ -337,7 +332,7 @@ Enum[APPLICATION,DEAL,CONVEYOR,DOSSIER], message: String)`
 5. МС `Dossier` отправляет клиенту письмо с текстом "Ваша заявка предварительно одобрена, завершите оформление".
 6. Клиент отправляет запрос в МС `Deal` со всеми своими полными данными о работодателе и прописке. Происходит
 [скоринг](#scoring) данных в МС `CC`, `CC` рассчитывает все данные по кредиту (ПСК, график платежей и тд), 
-МС `Deal` сохраняет обновленную заявку и сущность кредит сделанную на основе `CreditDTO` полученного 
+МС `Deal` сохраняет обновленную заявку и сущность кредит сделанную на основе [CreditDTO](#CreditDTO) полученного 
 из `CC` со статусом CALCULATED в БД.
 7. После валидации МС `Dossier` отправляет письмо на почту клиенту с одобрением или отказом. Если кредит одобрен, то в 
 письме присутствует ссылка на запрос "Сформировать документы"
@@ -395,3 +390,117 @@ Enum[APPLICATION,DEAL,CONVEYOR,DOSSIER], message: String)`
 ## Sequence-диаграмма
 
 ![sequence diagram](/images/sequence-diagram.vpd.png)
+
+## Модели API
+### LoanApplicationRequestDTO
+```json
+{
+    "amount": "BigDecimal",
+    "term": "Integer",
+    "firstName": "String",
+    "lastName": "String",
+    "middleName": "String",
+    "email": "String",
+    "birthdate": "LocalDate",
+    "passportSeries": "String",
+    "passportNumber": "String"
+}
+```
+### LoanOfferDTO
+```json
+{
+    "applicationId": "Long",
+    "requestedAmount": "BigDecimal",
+    "totalAmount": "BigDecimal",
+    "term": "Integer",
+    "monthlyPayment": "BigDecimal",
+    "rate": "BigDecimal",
+    "isInsuranceEnabled": "Boolean",
+    "isSalaryClient": "Boolean"
+}
+```
+### ScoringDataDTO
+```json
+{
+  "amount": "BigDecimal",
+  "term": "Integer",
+  "firstName": "String",
+  "lastName": "String",
+  "middleName": "String",
+  "gender": "Enum",
+  "birthdate": "LocalDate",
+  "passportSeries": "String",
+  "passportNumber": "String",
+  "passportIssueDate": "LocalDate",
+  "passportIssueBranch": "String",
+  "maritalStatus": "Enum",
+  "dependentAmount": "Integer",
+  "employment": "EmploymentDTO",
+  "account": "String",
+  "isInsuranceEnabled": "Boolean",
+  "isSalaryClient": "Boolean"
+}
+```
+### CreditDTO
+```json
+{
+    "amount": "BigDecimal",
+    "term": "Integer",
+    "monthlyPayment": "BigDecimal",
+    "rate": "BigDecimal",
+    "psk": "BigDecimal",
+    "isInsuranceEnabled": "Boolean",
+    "isSalaryClient": "Boolean",
+    "paymentSchedule": "List<PaymentScheduleElement>"
+}
+```
+### FinishRegistrationRequestDTO
+```json
+{
+    "gender": "Enum",
+    "maritalStatus": "Enum",
+    "dependentAmount": "Integer",
+    "passportIssueDate": "LocalDate",
+    "passportIssueBranch": "String",
+    "employment": "EmploymentDTO",
+    "account": "String"
+}
+```
+### EmploymentDTO
+```json
+{
+    "employmentStatus": "Enum",
+    "employerINN": "String",
+    "salary": "BigDecimal",
+    "position": "Enum",
+    "workExperienceTotal": "Integer",
+    "workExperienceCurrent": "Integer"
+}
+```
+### PaymentScheduleElement
+```json
+{
+    "number": "Integer",
+    "date": "LocalDate",
+    "totalPayment": "BigDecimal",
+    "interestPayment": "BigDecimal",
+    "debtPayment": "BigDecimal",
+    "remainingDebt": "BigDecimal"
+}
+```
+### ApplicationStatusHistoryDTO
+```json
+{
+    "status": "Enum",
+    "time": "LocalDateTime",
+    "changeType": "Enum"
+}
+```
+### EmailMessage
+```json
+{
+    "address": "String",
+    "theme": "Enum",
+    "applicationId": "Long"
+}
+```
